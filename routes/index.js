@@ -36,13 +36,11 @@ router.get('/', function(req, res) {
 router.post('/gerar-roteiro', async function(req, res) {
     let { vibe, latitude, longitude, enderecoManual, raiokm, excludedIds } = req.body;
     
-    // Tratamento de dinheiro
     let orcamentoString = req.body.orcamento ? req.body.orcamento.toString().replace(',', '.') : "0";
     let orcamento = parseFloat(orcamentoString);
-    
-    // Tratamento de Lugares Excluídos (para não repetir)
     let lugaresJaVistos = excludedIds ? excludedIds.split(',') : [];
 
+    // Validar Inputs
     if (isNaN(orcamento) || orcamento <= 0) {
         return res.render('index', { 
             title: 'Fugida', roteiros: null, 
@@ -84,58 +82,45 @@ router.post('/gerar-roteiro', async function(req, res) {
             throw new Error("Localização necessária.");
         }
 
-        // --- 2. RAIO (SLIDER vs AUTOMÁTICO) ---
-        let raioMetros;
-        if (raiokm) {
-            // Se o usuário usou o slider, respeita o slider
-            raioMetros = parseInt(raiokm) * 1000;
-            console.log(`[RAIO] Usuário definiu: ${raioMetros}m`);
-        } else {
-            // Padrão 5km se não vier nada
-            raioMetros = 5000;
-        }
+        // --- 2. RAIO ---
+        let raioMetros = raiokm ? parseInt(raiokm) * 1000 : 5000;
 
         // --- 3. FILTRO DE PREÇO ---
         let priceFilter = "";
         let estimativaUber = 40; 
         let dinheiroLiquido = incluirUberNoOrcamento ? (orcamento - estimativaUber) : orcamento;
 
-        if (dinheiroLiquido >= 300) priceFilter = "&minprice=3"; 
-        else if (dinheiroLiquido >= 150) priceFilter = "&minprice=2&maxprice=3";
-        else if (dinheiroLiquido <= 60) priceFilter = "&maxprice=1";
-        else priceFilter = "&maxprice=2";
+        if (dinheiroLiquido >= 300) priceFilter = "&maxprice=4"; 
+        else if (dinheiroLiquido >= 150) priceFilter = "&maxprice=3"; 
+        else if (dinheiroLiquido >= 80) priceFilter = "&maxprice=2"; 
+        else priceFilter = "&maxprice=1"; 
 
-        // --- 4. BUSCA ---
+        // --- 4. BUSCA INICIAL ---
         let queryFinal = vibe;
         if (termoBusca) queryFinal = `${vibe} em ${termoBusca}`;
 
         const placesUrl = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(queryFinal)}&location=${latitude},${longitude}&radius=${raioMetros}&openNow=true&language=pt-BR${priceFilter}&key=${keyPlaces}`;
         
+        console.log(`[PLACES] Iniciando busca...`);
         let placesResponse = await axios.get(placesUrl);
         let resultados = placesResponse.data.results;
 
         // Fallback
         if (!resultados || resultados.length === 0) {
+            console.log("[PLACES] Busca vazia. Tentando fallback...");
             const fallbackUrl = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(vibe)}&location=${latitude},${longitude}&radius=${raioMetros}&openNow=true&language=pt-BR&key=${keyPlaces}`;
             placesResponse = await axios.get(fallbackUrl);
             resultados = placesResponse.data.results;
         }
 
-        if (!resultados || resultados.length === 0) {
-            throw new Error("Nenhum lugar encontrado nesse raio. Tenta aumentar o raio ou mudar o orçamento, z!");
-        }
+        if (!resultados || resultados.length === 0) throw new Error("Nenhum lugar encontrado.");
 
-        // --- 5. FILTRO DE REPETIÇÃO ("NÃO GOSTEI") ---
         let novosResultados = resultados.filter(place => !lugaresJaVistos.includes(place.place_id));
+        if (novosResultados.length === 0) throw new Error("Você já viu todas as opções dessa região!");
 
-        if (novosResultados.length === 0) {
-            throw new Error("Uau! Você já viu todas as opções dessa região. Tente mudar o raio ou a vibe.");
-        }
+        let candidatos = shuffleArray(novosResultados);
 
-        let bonsLugares = shuffleArray(novosResultados);
-        let candidatos = bonsLugares; // MUDANÇA: Pega TODOS os resultados, não limita mais
-
-        // --- 6. DISTÂNCIA E CÁLCULOS ---
+        // --- 5. DISTÂNCIA ---
         const destinations = candidatos.map(p => `place_id:${p.place_id}`).join('|');
         const distUrl = `https://maps.googleapis.com/maps/api/distancematrix/json?origins=${latitude},${longitude}&destinations=${destinations}&mode=driving&language=pt-BR&key=${keyDistance}`;
         const distResponse = await axios.get(distUrl);
@@ -144,35 +129,57 @@ router.post('/gerar-roteiro', async function(req, res) {
         const elementosDistancia = distResponse.data.rows[0].elements;
         let roteirosFinais = [];
 
-        candidatos.forEach((lugar, index) => {
-            const infoDist = elementosDistancia[index];
+        // LOOP DE PROCESSAMENTO
+        for (let i = 0; i < candidatos.length; i++) {
+            const lugar = candidatos[i];
+            const infoDist = elementosDistancia[i];
+
             if (infoDist && infoDist.status === 'OK') {
                 const distanciaKm = infoDist.distance.value / 1000;
                 const raioKm = raioMetros / 1000;
                 
-                // FILTRO CRÍTICO: Se o lugar tá fora do raio, ignora completamente
-                if (distanciaKm > raioKm) {
-                    console.log(`[FILTRO] ${lugar.name} tá a ${distanciaKm.toFixed(1)}km - FORA do raio de ${raioKm}km`);
-                    return;
-                }
+                if (distanciaKm > raioKm) continue; 
                 
-                // Uber
                 const precoBase = 7.50;
                 const precoPorKm = 2.65; 
                 let custoUberTotal = ((precoBase + (distanciaKm * precoPorKm)) * 2) * 1.15; 
                 let saldo = incluirUberNoOrcamento ? (orcamento - custoUberTotal) : orcamento;
                 
-                if (incluirUberNoOrcamento && custoUberTotal > (orcamento * 0.45)) return;
-                if (saldo < 15) return; 
+                if (incluirUberNoOrcamento && custoUberTotal > (orcamento * 0.45)) continue;
+                if (saldo < 15) continue; 
 
-                // Foto
-                let fotoUrl;
+                // --- LÓGICA DE FOTO OBRIGATÓRIA (COM LOGS) ---
+                let fotoUrl = null;
+                const lat = lugar.geometry.location.lat;
+                const lng = lugar.geometry.location.lng;
+
+                // TENTATIVA 1: Busca Inicial
                 if (lugar.photos && lugar.photos.length > 0) {
                     fotoUrl = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=600&photoreference=${lugar.photos[0].photo_reference}&key=${keyPlaces}`;
-                } else {
-                    const lat = lugar.geometry.location.lat;
-                    const lng = lugar.geometry.location.lng;
-                    fotoUrl = `https://maps.googleapis.com/maps/api/streetview?size=600x400&location=${lat},${lng}&fov=90&heading=0&pitch=10&source=outdoor&key=${keyGeo}`;
+                    // console.log(`[FOTO] OK (Busca Simples): ${lugar.name}`);
+                } 
+                else {
+                    // TENTATIVA 2: Busca Profunda (Details)
+                    try {
+                        const detailsUrl = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${lugar.place_id}&fields=name,photos&key=${keyPlaces}`;
+                        const detailsResponse = await axios.get(detailsUrl);
+                        
+                        if (detailsResponse.data.result && detailsResponse.data.result.photos && detailsResponse.data.result.photos.length > 0) {
+                            const ref = detailsResponse.data.result.photos[0].photo_reference;
+                            fotoUrl = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=600&photoreference=${ref}&key=${keyPlaces}`;
+                            console.log(`[FOTO] RECUPERADA (Deep Search): ${lugar.name}`);
+                        } else {
+                            console.log(`[FOTO] SEM FOTO OFICIAL: ${lugar.name}`);
+                        }
+                    } catch (err) {
+                        console.error(`[FOTO] ERRO API DETAILS: ${lugar.name}`);
+                    }
+                }
+
+                // TENTATIVA 3: Fallback Mapa Estático (GARANTIA FINAL)
+                if (!fotoUrl) {
+                    console.log(`[FOTO] USANDO MAPA ESTÁTICO: ${lugar.name}`);
+                    fotoUrl = `https://maps.googleapis.com/maps/api/staticmap?center=${lat},${lng}&zoom=17&size=600x300&markers=color:red%7C${lat},${lng}&maptype=roadmap&key=${keyGeo}`;
                 }
 
                 roteirosFinais.push({
@@ -187,17 +194,16 @@ router.post('/gerar-roteiro', async function(req, res) {
                     foto: fotoUrl,
                     estimativa_preco: getEstimativaPreco(lugar.price_level),
                     incluirUber: incluirUberNoOrcamento,
-                    lat: lugar.geometry.location.lat,
-                    lng: lugar.geometry.location.lng
+                    lat: lat,
+                    lng: lng
                 });
             }
-        });
+        }
 
         roteirosFinais.sort((a, b) => b.rating - a.rating);
-        // MUDANÇA: Removido o slice(0, 5) - agora mostra TODOS os resultados
 
         if (roteirosFinais.length === 0) {
-            throw new Error("Nenhum lugar viável com esse orçamento nesse raio. Aumenta o raio ou o orçamento!");
+            throw new Error("No momento, não há locais disponíveis que atendam ao orçamento definido dentro desse raio de busca.");
         }
 
         res.render('index', { 
@@ -209,7 +215,7 @@ router.post('/gerar-roteiro', async function(req, res) {
         });
 
     } catch (error) {
-        console.error("ERRO:", error.message);
+        console.error("ERRO GERAL:", error.message);
         res.render('index', { 
             title: 'Fugida', roteiros: null, 
             erro: "Erro: " + error.message,
