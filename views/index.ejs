@@ -1,55 +1,170 @@
 <%- include('layouts/header.ejs') %>
 
 <style>
+  /* =========================================
+     1. BASE & FUNDO
+     ========================================= */
   :root { --primary: #FF6B35; --primary-dark: #E85D2C; --secondary: #FFB800; --bg: #050505; --text: #FFFFFF; --text-muted: #A0A0A0; --glass: rgba(255, 255, 255, 0.05); --border: rgba(255, 255, 255, 0.1); }
-  body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); }
+  body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); overflow-x: hidden; }
+  
   .bg-animation { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
-  .gradient-orb { position: absolute; border-radius: 50%; filter: blur(60px); opacity: 0.3; animation: float 20s ease-in-out infinite; }
-  .orb-1 { width: 450px; height: 450px; background: radial-gradient(circle, var(--primary), transparent); top: -150px; right: -150px; }
-  .orb-2 { width: 375px; height: 375px; background: radial-gradient(circle, var(--secondary), transparent); bottom: -112px; left: -112px; animation-delay: 5s; }
+  .gradient-orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.25; animation: float 20s ease-in-out infinite; }
+  .orb-1 { width: 500px; height: 500px; background: radial-gradient(circle, var(--primary), transparent); top: -150px; right: -150px; }
+  .orb-2 { width: 400px; height: 400px; background: radial-gradient(circle, var(--secondary), transparent); bottom: -100px; left: -100px; animation-delay: 5s; }
   @keyframes float { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(22px, -22px); } }
-  .container { position: relative; z-index: 1; max-width: 900px; padding: 18px; margin: 0 auto; }
-  .logo { font-size: 24px; font-weight: 900; background: linear-gradient(135deg, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: -1px; margin-bottom: 60px; }
+  
+  .container { position: relative; z-index: 1; max-width: 800px; padding: 20px; margin: 0 auto; }
+  .logo { font-size: 26px; font-weight: 900; background: linear-gradient(135deg, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: -1px; margin-bottom: 50px; text-align: center; }
+  
   .hero { text-align: center; margin-bottom: 45px; }
   .hero h1 { font-size: clamp(30px, 8vw, 54px); font-weight: 900; line-height: 1.1; margin-bottom: 15px; letter-spacing: -2px; }
   .gradient-text { background: linear-gradient(135deg, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
   .hero p { font-size: 13.5px; color: var(--text-muted); max-width: 412px; margin: 0 auto; }
-  .search-card { max-width: 510px; margin: 0 auto 60px; background: var(--glass); border: 1px solid var(--border); border-radius: 18px; padding: 30px; backdrop-filter: blur(20px); }
-  label { display: block; font-size: 10.5px; font-weight: 600; margin-bottom: 7.5px; }
-  .search-card input:not([type=range]):not([type=checkbox]), .search-card select { width: 100%; padding: 10.5px 13.5px; background: rgba(255, 255, 255, 0.03) !important; border: 1px solid var(--border) !important; border-radius: 9px; color: var(--text) !important; font-size: 11.25px; outline: none; transition: all 0.3s; }
-  .search-card input:not([type=range]):not([type=checkbox]):focus, .search-card select:focus { background: rgba(255, 255, 255, 0.05) !important; border-color: var(--primary) !important; box-shadow: 0 0 0 2.25px rgba(255, 107, 53, 0.1) !important; }
-  .search-card select option { background: #1a1a1a; color: white; }
-  .input-group { position: relative; margin-bottom: 6px; }
-  .input-hint { font-size: 11.25px; color: var(--text-muted); margin-top: 4.5px; font-style: italic; }
-  .gps-btn { position: absolute; right: 4.5px; top: 50%; transform: translateY(-50%); background: linear-gradient(135deg, var(--primary), var(--primary-dark)); border: none; width: 30px; height: 30px; border-radius: 7.5px; cursor: pointer; transition: transform 0.2s; }
-  
-  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
-  
-  .checkbox-group { display: flex; align-items: center; gap: 6px; margin-top: 9px; padding: 7.5px; background: rgba(255, 255, 255, 0.02); border-radius: 6px; }
-  .checkbox-group input[type=checkbox] { width: 13.5px; height: 13.5px; cursor: pointer; accent-color: var(--primary); }
-  .checkbox-group label { margin: 0; font-size: 9.75px; font-weight: 500; cursor: pointer; }
-  
-  .range-container { margin-top: 15px; }
-  input[type=range] { width: 100%; accent-color: var(--primary); height: 4.5px; background: #333; border-radius: 3.75px; outline: none; }
-  .range-value { text-align: right; color: var(--secondary); font-weight: bold; font-size: 0.675em; margin-top: 3.75px; }
 
-  #map { width: 100%; height: 300px; border-radius: 15px; margin-bottom: 30px; border: 1px solid var(--border); }
+  /* =========================================
+     2. FORMULÁRIO
+     ========================================= */
+  .search-card { max-width: 550px; margin: 0 auto 50px; background: var(--glass); border: 1px solid var(--border); border-radius: 20px; padding: 30px; backdrop-filter: blur(20px); box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
+  
+  label { display: block; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+  
+  input:not([type=range]):not([type=checkbox]), select { width: 100%; padding: 14px 16px; background: rgba(0, 0, 0, 0.3) !important; border: 1px solid var(--border) !important; border-radius: 12px; color: var(--text) !important; font-size: 14px; outline: none; transition: all 0.3s; }
+  input:focus, select:focus { border-color: var(--primary) !important; background: rgba(0, 0, 0, 0.5) !important; }
+  select option { background: #1a1a1a; color: white; }
+  
+  .input-wrapper { position: relative; margin-bottom: 20px; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
+  
+  .gps-btn { position: absolute; right: 8px; top: 38px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); border: none; width: 32px; height: 32px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: transform 0.2s; }
+  .gps-btn:hover { transform: scale(1.05); }
 
-  .submit-btn { width: 100%; padding: 12px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); border: none; border-radius: 9px; color: white; font-size: 12px; font-weight: 700; cursor: pointer; transition: transform 0.2s; margin-top: 15px; }
+  .extras { display: flex; align-items: center; justify-content: space-between; margin-top: 20px; padding-top: 15px; border-top: 1px solid var(--border); }
+  .checkbox-label { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #ccc; cursor: pointer; }
+  input[type=checkbox] { width: 16px; height: 16px; accent-color: var(--primary); cursor: pointer; }
+  input[type=range] { width: 100px; accent-color: var(--primary); height: 4px; background: #333; border-radius: 4px; outline: none; }
+
+  .submit-btn { width: 100%; padding: 16px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); border: none; border-radius: 12px; color: white; font-weight: 800; font-size: 16px; cursor: pointer; margin-top: 20px; transition: transform 0.2s; box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3); }
   .submit-btn:hover { transform: translateY(-2px); }
-  .results-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 18px; margin-bottom: 60px; }
-  .place-card { background: var(--glass); border: 1px solid var(--border); border-radius: 15px; overflow: hidden; backdrop-filter: blur(20px); transition: transform 0.3s; }
-  .place-card:hover { transform: translateY(-3px); }
-  .place-image { width: 100%; height: 150px; object-fit: cover; }
-  .place-content { padding: 15px; }
-  .maps-btn { width: 100%; padding: 9px; background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border); border-radius: 7.5px; color: var(--text); font-size: 10.5px; font-weight: 600; margin-top: 10.5px; text-decoration: none; display: block; text-align: center; transition: all 0.3s; }
-  .maps-btn:hover { background: rgba(255, 255, 255, 0.1); border-color: var(--primary); }
-  .price-row { display: flex; justify-content: space-between; padding: 7.5px 0; border-top: 1px solid var(--border); font-size: 10.5px; }
-  .price-row.total { border-top: 2px solid var(--border); font-weight: 700; color: var(--secondary); font-size: 11.25px; margin-top: 4.5px; }
-  .rating-badge { display: inline-block; padding: 3px 9px; background: rgba(255, 184, 0, 0.15); border: 1px solid rgba(255, 184, 0, 0.3); border-radius: 15px; font-size: 9.75px; font-weight: 600; color: var(--secondary); margin-bottom: 7.5px; }
+
+  /* =========================================
+     3. AUTOCOMPLETE
+     ========================================= */
+  .suggestions-box { position: absolute; top: 100%; left: 0; right: 0; background: #1a1a1a; border: 1px solid #333; border-radius: 12px; margin-top: 8px; z-index: 100; box-shadow: 0 15px 40px rgba(0,0,0,0.5); display: none; overflow: hidden; }
+  .suggestion-item { padding: 12px 16px; cursor: pointer; border-bottom: 1px solid #2a2a2a; display: flex; align-items: center; gap: 12px; transition: background 0.1s; }
+  .suggestion-item:last-child { border-bottom: none; }
+  .suggestion-item:hover { background: #252525; }
+  .suggestion-icon { width: 32px; height: 32px; background: #2a2a2a; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .suggestion-info { display: flex; flex-direction: column; }
+  .suggestion-main { font-size: 14px; font-weight: 600; color: #fff; }
+  .suggestion-sub { font-size: 12px; color: #888; margin-top: 2px; }
   
-  @media (max-width: 768px) {
-    .form-row { grid-template-columns: 1fr; }
+  .spinner { position: absolute; right: 50px; top: 35px; width: 18px; height: 18px; border: 2px solid #333; border-top-color: var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; display: none; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* =========================================
+     4. RESULTADOS
+     ========================================= */
+  .results-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; margin-bottom: 60px; }
+  
+  .place-card { 
+    background: #151515; 
+    border: 1px solid #333; 
+    border-radius: 16px; 
+    overflow: hidden; 
+    transition: transform 0.2s, border-color 0.2s; 
+    cursor: pointer; 
+    display: flex; 
+    flex-direction: column;
+  }
+  .place-card:hover { transform: translateY(-4px); border-color: var(--primary); }
+  
+  .place-img { width: 100%; height: 180px; object-fit: cover; }
+  .place-content { padding: 18px; display: flex; flex-direction: column; height: 100%; }
+  
+  .place-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+  .place-name { font-size: 16px; font-weight: 700; margin: 0; color: #fff; }
+  .place-rating { background: rgba(255, 184, 0, 0.15); color: #FFB800; padding: 2px 8px; border-radius: 8px; font-size: 12px; font-weight: 600; white-space: nowrap; }
+  
+  .place-address { font-size: 12px; color: #999; margin-bottom: 12px; line-height: 1.4; flex-grow: 1; }
+  
+  .price-tag { display: flex; justify-content: space-between; align-items: center; font-size: 13px; padding-top: 12px; border-top: 1px solid #2a2a2a; margin-top: auto; }
+  .money-left { color: #10b981; font-weight: 700; }
+  
+  .click-hint { font-size: 11px; color: var(--primary); text-align: center; margin-top: 10px; font-weight: 600; opacity: 0.8; }
+
+  #map { width: 100%; height: 280px; border-radius: 16px; margin-bottom: 30px; border: 1px solid var(--border); filter: grayscale(20%); }
+
+  /* =========================================
+     5. MODAL, CARROSSEL (CORRIGIDO) E APPS
+     ========================================= */
+  .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.85); backdrop-filter: blur(8px); }
+  .modal-content { position: relative; background: #121212; margin: 5% auto; padding: 0; border: 1px solid #333; width: 95%; max-width: 650px; border-radius: 20px; box-shadow: 0 25px 50px rgba(0,0,0,0.5); animation: slideUp 0.3s ease-out; }
+  @keyframes slideUp { from { opacity: 0; transform: translateY(50px); } to { opacity: 1; transform: translateY(0); } }
+  
+  .modal-close { position: absolute; top: 15px; right: 15px; background: rgba(0,0,0,0.5); width: 32px; height: 32px; border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 10; font-size: 20px; transition: 0.2s; }
+  .modal-close:hover { background: var(--primary); }
+
+  /* --- CSS DO CARROSSEL REFORMULADO --- */
+.carousel { 
+    position: relative; 
+    width: 100%; 
+    height: 320px; 
+    overflow: hidden; 
+    border-radius: 20px 20px 0 0; 
+    background: #000; 
+  }
+
+.carousel-track { 
+    display: flex; 
+    transition: transform 0.3s ease-in-out; 
+    /* IMPORTANTE: Removemos width: 100% e height fixa para a fita fluir */
+    width: max-content; 
+    height: 100%;
+  }
+
+.carousel-item { 
+    /* O SEGREDO: flex: 0 0 100% força a imagem a ter o tamanho exato do container pai */
+    flex: 0 0 100%;
+    width: 100%; /* Fallback */
+    height: 100%; 
+    object-fit: cover; 
+    display: block; 
+  }
+  
+  .carousel-btn { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.2); color: white; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; transition: 0.2s; z-index: 5; }
+  .carousel-btn:hover { background: var(--primary); border-color: var(--primary); }
+  .prev-btn { left: 15px; }
+  .next-btn { right: 15px; }
+
+  .modal-body { padding: 30px; }
+  .modal-title { font-size: 24px; font-weight: 800; margin-bottom: 5px; color: #fff; }
+  
+  .modal-meta { display: flex; gap: 8px; margin-bottom: 25px; flex-wrap: wrap; }
+  .tag { background: #222; padding: 6px 14px; border-radius: 20px; font-size: 12px; color: #ddd; border: 1px solid #333; display: flex; align-items: center; gap: 6px; }
+  
+  /* ESTILO DOS BOTÕES DE APP (TEXTO + CORES) */
+  .app-btn {
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 800;
+    padding: 8px 18px;
+    border-radius: 20px;
+    display: inline-block;
+    transition: transform 0.2s;
+  }
+  .app-btn:hover { transform: translateY(-2px); opacity: 0.9; }
+  .app-uber { background: #000; color: #fff; border: 1px solid #333; }
+  .app-99 { background: #FFC90B; color: #000; border: 1px solid #E6B400; }
+  
+  .reviews-title { font-size: 15px; font-weight: 700; margin: 25px 0 15px; border-top: 1px solid #222; padding-top: 20px; color: #888; text-transform: uppercase; letter-spacing: 0.5px; }
+  .review-item { background: #1a1a1a; padding: 15px; border-radius: 12px; margin-bottom: 12px; border: 1px solid #2a2a2a; }
+  .review-header { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 13px; font-weight: 600; color: #fff; }
+  .review-stars { color: #FFB800; font-size: 11px; }
+  .review-text { font-size: 13px; color: #999; line-height: 1.5; font-style: italic; }
+
+  @media(max-width: 768px) {
+    .grid-2 { grid-template-columns: 1fr; }
+    .carousel { height: 220px; }
   }
 </style>
 
@@ -67,148 +182,128 @@
   </section>
 
   <div class="search-card">
-    <form action="/gerar-roteiro" method="POST" id="mainForm">
-      <input type="hidden" name="latitude" id="latitude" value="<%= typeof dadosBusca !== 'undefined' && dadosBusca && dadosBusca.latitude ? dadosBusca.latitude : '' %>">
-      <input type="hidden" name="longitude" id="longitude" value="<%= typeof dadosBusca !== 'undefined' && dadosBusca && dadosBusca.longitude ? dadosBusca.longitude : '' %>">
-      <input type="hidden" name="excludedIds" id="excludedIds" value="<%= typeof dadosBusca !== 'undefined' && dadosBusca && dadosBusca.excludedIds ? dadosBusca.excludedIds : '' %>">
+    <form action="/gerar-roteiro" method="POST" id="mainForm" autocomplete="off">
+      <input type="hidden" name="latitude" id="latitude" value="<%= (typeof dadosBusca !== 'undefined' && dadosBusca && dadosBusca.latitude) ? dadosBusca.latitude : '' %>">
+      <input type="hidden" name="longitude" id="longitude" value="<%= (typeof dadosBusca !== 'undefined' && dadosBusca && dadosBusca.longitude) ? dadosBusca.longitude : '' %>">
+      <input type="hidden" name="excludedIds" id="excludedIds" value="<%= (typeof dadosBusca !== 'undefined' && dadosBusca && dadosBusca.excludedIds) ? dadosBusca.excludedIds : '' %>">
 
-      <div style="margin-bottom: 15px;">
+      <div class="input-wrapper">
         <label>Onde você está?</label>
-        <div class="input-group">
-          <input type="text" name="enderecoManual" id="enderecoManual" placeholder="Ex: Bairro, cidade, CEP ou ponto de referência." value="<%= typeof dadosBusca !== 'undefined' && dadosBusca && dadosBusca.enderecoManual ? dadosBusca.enderecoManual : '' %>">
-          <button type="button" class="gps-btn" id="btnGps" title="Usar minha localização atual">
-            <svg width="13.5" height="13.5" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-          </button>
-        </div>
-        <div class="input-hint">Dica: informe um ponto de referência próximo para obter resultados mais precisos.</div>
+        <input type="text" name="enderecoManual" id="enderecoManual" placeholder="Ex: Savassi, Belo Horizonte..." value="<%= (typeof dadosBusca !== 'undefined' && dadosBusca && dadosBusca.enderecoManual) ? dadosBusca.enderecoManual : '' %>">
+        
+        <button type="button" class="gps-btn" id="btnGps" title="Localização Atual">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        </button>
+        
+        <div class="spinner" id="loadingSpinner"></div>
+        <div id="sugestoes" class="suggestions-box"></div>
       </div>
 
-      <div class="form-row">
-        <div>
+      <div class="grid-2">
+        <div style="position: relative;">
           <label>Qual a vibe?</label>
           <select name="vibe">
-            <option value="restaurante barzinho" <%= typeof dadosBusca !== 'undefined' && dadosBusca && dadosBusca.vibe === 'restaurante barzinho' ? 'selected' : '' %>>Barzinho</option>
-            <option value="restaurante romântico" <%= typeof dadosBusca !== 'undefined' && dadosBusca && dadosBusca.vibe === 'restaurante romântico' ? 'selected' : '' %>>Date</option>
-            <option value="hamburgueria pizza" <%= typeof dadosBusca !== 'undefined' && dadosBusca && dadosBusca.vibe === 'hamburgueria pizza' ? 'selected' : '' %>>Larica</option>
-            <option value="parque ar livre" <%= typeof dadosBusca !== 'undefined' && dadosBusca && dadosBusca.vibe === 'parque ar livre' ? 'selected' : '' %>>Ar livre</option>
-            <option value="balada festa" <%= typeof dadosBusca !== 'undefined' && dadosBusca && dadosBusca.vibe === 'balada festa' ? 'selected' : '' %>>Festa</option>
-            <option value="museu cultura cinema" <%= typeof dadosBusca !== 'undefined' && dadosBusca && dadosBusca.vibe === 'museu cultura cinema' ? 'selected' : '' %>>Cultura</option>
+            <option value="restaurante barzinho" <%= (typeof dadosBusca !== 'undefined' && dadosBusca && dadosBusca.vibe === 'restaurante barzinho') ? 'selected' : '' %>>🍻 Barzinho</option>
+            <option value="restaurante romântico" <%= (typeof dadosBusca !== 'undefined' && dadosBusca && dadosBusca.vibe === 'restaurante romântico') ? 'selected' : '' %>>❤️ Date</option>
+            <option value="hamburgueria pizza" <%= (typeof dadosBusca !== 'undefined' && dadosBusca && dadosBusca.vibe === 'hamburgueria pizza') ? 'selected' : '' %>>🍔 Larica</option>
+            <option value="parque ar livre" <%= (typeof dadosBusca !== 'undefined' && dadosBusca && dadosBusca.vibe === 'parque ar livre') ? 'selected' : '' %>>🌳 Ar livre</option>
+            <option value="balada festa" <%= (typeof dadosBusca !== 'undefined' && dadosBusca && dadosBusca.vibe === 'balada festa') ? 'selected' : '' %>>🎉 Festa</option>
+            <option value="museu cultura cinema" <%= (typeof dadosBusca !== 'undefined' && dadosBusca && dadosBusca.vibe === 'museu cultura cinema') ? 'selected' : '' %>>🏛️ Cultura</option>
           </select>
         </div>
 
         <div>
           <label>Orçamento (R$)</label>
-          <input type="number" name="orcamento" placeholder="150" required value="<%= typeof dadosBusca !== 'undefined' && dadosBusca && dadosBusca.orcamento ? dadosBusca.orcamento : '' %>">
-          <div class="checkbox-group">
-            <input type="checkbox" name="incluirUber" id="incluirUber" <%= typeof dadosBusca !== 'undefined' && dadosBusca && dadosBusca.incluirUber ? 'checked' : '' %>>
-            <label for="incluirUber">Incluir transporte por aplicativo no orçamento.</label>
-          </div>
+          <input type="number" name="orcamento" placeholder="150" required value="<%= (typeof dadosBusca !== 'undefined' && dadosBusca && dadosBusca.orcamento) ? dadosBusca.orcamento : '' %>">
         </div>
       </div>
 
-      <div class="range-container">
-        <label>Raio de Busca: <span id="raioValor"><%= typeof dadosBusca !== 'undefined' && dadosBusca && dadosBusca.raiokm ? dadosBusca.raiokm : '5' %></span> km</label>
-        <input type="range" name="raiokm" id="raioInput" min="1" max="30" value="<%= typeof dadosBusca !== 'undefined' && dadosBusca && dadosBusca.raiokm ? dadosBusca.raiokm : '5' %>">
+      <div class="extras">
+        <div style="color: var(--text-muted); font-size: 12px; font-weight: 600;">
+           Raio: <span id="raioValor" style="color: white;"><%= (typeof dadosBusca !== 'undefined' && dadosBusca && dadosBusca.raiokm) ? dadosBusca.raiokm : '5' %></span> km
+           <input type="range" name="raiokm" id="raioInput" min="1" max="30" value="<%= (typeof dadosBusca !== 'undefined' && dadosBusca && dadosBusca.raiokm) ? dadosBusca.raiokm : '5' %>" style="vertical-align: middle; margin-left: 10px;">
+        </div>
+        <label class="checkbox-label">
+          <input type="checkbox" name="incluirUber" id="incluirUber" <%= (typeof dadosBusca !== 'undefined' && dadosBusca && dadosBusca.incluirUber) ? 'checked' : '' %>> Incluir Uber
+        </label>
       </div>
 
-      <button type="submit" id="btnProcurar" class="submit-btn">Procurar</button>
+      <button type="submit" id="btnProcurar" class="submit-btn">Descobrir Lugares</button>
     </form>
   </div>
 
   <% if (roteiros && roteiros.length > 0) { %>
-    <div style="text-align: center; margin-bottom: 22.5px;">
-      <h2 style="font-size: 24px; font-weight: 800; margin-bottom: 6px;">Melhores opções</h2>
-      <p style="color: var(--text-muted); font-size: 11.25px;">Encontramos <%= roteiros.length %> lugar<%= roteiros.length > 1 ? 'es' : '' %> pra você</p>
+    <div style="text-align: center; margin-bottom: 25px;">
+      <h2 style="font-size: 24px; font-weight: 800; margin-bottom: 5px;">Melhores Opções</h2>
+      <p style="color: var(--text-muted); font-size: 13px;">Encontramos <%= roteiros.length %> sugestões para você</p>
     </div>
 
     <div id="map"></div>
 
     <div class="results-grid">
       <% roteiros.forEach(item => { %>
-        <div class="place-card">
+        <div class="place-card" onclick="abrirDetalhes('<%= item.id %>')">
           <img 
             src="<%= item.foto %>" 
-            alt="<%= item.nome %>" 
-            class="place-image"
+            class="place-img" 
             onerror="this.onerror=null; this.src='https://maps.googleapis.com/maps/api/streetview?size=600x400&location=<%= item.lat %>,<%= item.lng %>&fov=80&source=outdoor&key=<%= mapKey %>';"
           >
           <div class="place-content">
-            <span class="rating-badge">⭐ <%= item.rating %></span>
-            <h3 style="font-size: 15px; font-weight: 700; margin: 7.5px 0;"><%= item.nome %></h3>
-            <p style="color: var(--text-muted); font-size: 9.75px; margin-bottom: 12px;"><%= item.endereco %></p>
-            
-            <div class="price-row" style="color: #FFB800;">
-              <span>Média de Gasto</span>
-              <span><%= item.estimativa_preco %></span>
+            <div class="place-header">
+              <h3 class="place-name"><%= item.nome %></h3>
+              <span class="place-rating">⭐ <%= item.rating %></span>
             </div>
-
-            <% if (item.incluirUber) { %>
-                <div class="price-row">
-                <span>Uber (Ida e Volta)</span>
-                <span>R$ <%= item.precoUber %></span>
-                </div>
-            <% } %>
-
-            <div class="price-row total">
-              <span><%= item.incluirUber ? 'Sobra do Orçamento' : 'Orçamento Disponível' %></span>
-              <span>R$ <%= item.saldo %></span>
+            <p class="place-address"><%= item.endereco %></p>
+            
+            <div class="price-tag">
+              <span style="color: #FFB800;"><%= item.estimativa_preco %></span>
+              <span class="money-left">Sobra: R$ <%= item.saldo %></span>
             </div>
             
-            <a href="https://www.google.com/maps/search/?api=1&query=<%= encodeURIComponent(item.nome + ' ' + item.endereco) %>" target="_blank" class="maps-btn">📍 Ver no Maps →</a>
+            <div class="click-hint">Ver detalhes</div>
           </div>
         </div>
       <% }) %>
     </div>
 
-    <div style="text-align: center; margin-bottom: 45px;">
-        <button id="btnOther" class="submit-btn" style="max-width: 300px; margin: 0 auto; background: linear-gradient(135deg, #333, #222);">
-            Exibir novas sugestões
+    <div style="text-align: center; margin-bottom: 60px;">
+        <button id="btnOther" class="submit-btn" style="max-width: 300px; margin: 0 auto; background: #222; border: 1px solid #333;">
+            Ver outras opções
         </button>
     </div>
   <% } %>
 
   <% if (erro) { %>
-    <div style="max-width: 450px; margin: 30px auto; padding: 15px; background: rgba(255, 107, 53, 0.1); border: 1px solid var(--primary); border-radius: 12px; text-align: center;">
-      <strong style="color: var(--primary); font-size: 12px;">⚠️ Erro:</strong> 
-      <p style="margin-top: 6px; color: var(--text); font-size: 11.25px;"><%= erro %></p>
+    <div style="max-width: 500px; margin: 30px auto; padding: 15px; background: rgba(255, 80, 80, 0.1); border: 1px solid rgba(255, 80, 80, 0.3); border-radius: 12px; text-align: center; color: #ff6b6b; font-size: 14px;">
+      ⚠️ <%= erro %>
     </div>
   <% } %>
 </div>
 
+<div id="modalDetalhes" class="modal">
+    <div class="modal-content">
+        <div class="modal-close" onclick="fecharModal()">×</div>
+        
+        <div class="carousel">
+            <div class="carousel-track" id="carouselTrack"></div>
+            <button class="carousel-btn prev-btn" onclick="moveCarousel(-1)">❮</button>
+            <button class="carousel-btn next-btn" onclick="moveCarousel(1)">❯</button>
+        </div>
+
+        <div class="modal-body" id="modalBody">
+            <div style="text-align: center; padding: 40px; color: #888;">Carregando...</div>
+        </div>
+    </div>
+</div>
+
 <script>
+// CONTROLES GERAIS
 const raioInput = document.getElementById('raioInput');
 const raioValor = document.getElementById('raioValor');
-raioInput.addEventListener('input', (e) => {
-    raioValor.innerText = e.target.value;
-});
-
-const btnGps = document.getElementById('btnGps');
-const inputEnd = document.getElementById('enderecoManual');
-const latitude = document.getElementById('latitude');
-const longitude = document.getElementById('longitude');
-
-btnGps.onclick = () => {
-  if (!navigator.geolocation) return alert('GPS não suportado no seu navegador');
-  inputEnd.placeholder = 'Buscando sua localização...';
-  inputEnd.disabled = true;
-  navigator.geolocation.getCurrentPosition(pos => {
-    latitude.value = pos.coords.latitude;
-    longitude.value = pos.coords.longitude;
-    inputEnd.value = '📍 Localização Atual (GPS Ativo)';
-    inputEnd.readOnly = true;
-    inputEnd.disabled = false;
-    btnGps.style.background = 'linear-gradient(135deg, #10b981, #059669)';
-  }, () => {
-    alert('Não foi possível obter sua localização');
-    inputEnd.placeholder = 'Ex: Orta Bar, Savassi, CEP 30140-071...';
-    inputEnd.disabled = false;
-  });
-};
+if(raioInput) raioInput.addEventListener('input', (e) => { raioValor.innerText = e.target.value; });
 
 const btnProcurar = document.getElementById('btnProcurar');
-btnProcurar.onclick = () => {
-    document.getElementById('excludedIds').value = "";
-};
+if(btnProcurar) btnProcurar.onclick = () => { document.getElementById('excludedIds').value = ""; };
 
 const btnOther = document.getElementById('btnOther');
 if(btnOther) {
@@ -217,86 +312,247 @@ if(btnOther) {
         const excludedInput = document.getElementById('excludedIds');
         const roteirosAtuais = <%- roteiros ? JSON.stringify(roteiros) : '[]' %>;
         const currentIds = roteirosAtuais.map(r => r.id);
-        
         let existing = excludedInput.value ? excludedInput.value.split(',') : [];
         let updated = existing.concat(currentIds);
-        
         excludedInput.value = updated.join(',');
         form.submit();
     }
 }
+
+// AUTOCOMPLETE
+const inputEnd = document.getElementById('enderecoManual');
+const box = document.getElementById('sugestoes');
+const spinner = document.getElementById('loadingSpinner');
+const estados = { "Minas Gerais": "MG", "São Paulo": "SP", "Rio de Janeiro": "RJ", "Espírito Santo": "ES", "Bahia": "BA", "Distrito Federal": "DF", "Paraná": "PR", "Santa Catarina": "SC", "Rio Grande do Sul": "RS", "Goiás": "GO" };
+let timer;
+
+inputEnd.addEventListener('input', function() {
+    const texto = this.value;
+    if (texto.length < 3) { box.style.display = 'none'; spinner.style.display = 'none'; return; }
+    spinner.style.display = 'block';
+    clearTimeout(timer);
+    timer = setTimeout(async () => {
+        try {
+            const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(texto)}&countrycodes=br&limit=5&addressdetails=1&layer=address`;
+            const res = await fetch(url);
+            renderizarSugestoes(await res.json());
+        } catch (e) { console.error(e); } 
+        finally { spinner.style.display = 'none'; }
+    }, 300);
+});
+
+function renderizarSugestoes(lista) {
+    box.innerHTML = '';
+    if (lista.length === 0) { box.style.display = 'none'; return; }
+    const vistos = new Set();
+    lista.forEach(item => {
+        const addr = item.address;
+        let principal = addr.suburb || addr.neighbourhood || addr.city_district || addr.city || addr.town || "";
+        let cidade = addr.city || addr.town || addr.municipality || "";
+        let estado = addr.state || "";
+        if (!principal || principal === cidade) { principal = cidade; cidade = ""; }
+        let uf = estados[estado] || estado;
+        let secundario = "";
+        if (cidade) secundario = `${cidade}`;
+        if (cidade && uf) secundario += ` - ${uf}`;
+        else if (uf) secundario += `${uf}`;
+        const chave = principal + secundario;
+        if (vistos.has(chave)) return;
+        vistos.add(chave);
+        const div = document.createElement('div');
+        div.className = 'suggestion-item';
+        div.innerHTML = `<div class="suggestion-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div><div class="suggestion-info"><span class="suggestion-main">${principal}</span>${secundario ? `<span class="suggestion-sub">${secundario}</span>` : ''}</div>`;
+        div.onclick = () => {
+            inputEnd.value = secundario ? `${principal}, ${secundario}` : principal;
+            document.getElementById('latitude').value = item.lat;
+            document.getElementById('longitude').value = item.lon;
+            box.style.display = 'none';
+        };
+        box.appendChild(div);
+    });
+    box.style.display = 'block';
+}
+document.addEventListener('click', (e) => { if (!inputEnd.contains(e.target) && !box.contains(e.target)) box.style.display = 'none'; });
+const btnGps = document.getElementById('btnGps');
+btnGps.onclick = () => {
+  if (!navigator.geolocation) return alert('GPS não suportado');
+  inputEnd.placeholder = 'Obtendo GPS...';
+  inputEnd.value = '';
+  inputEnd.disabled = true;
+  navigator.geolocation.getCurrentPosition(pos => {
+    document.getElementById('latitude').value = pos.coords.latitude;
+    document.getElementById('longitude').value = pos.coords.longitude;
+    inputEnd.value = '📍 Minha Localização Atual';
+    inputEnd.disabled = false;
+    inputEnd.style.color = '#10b981';
+  }, () => {
+    alert('Erro ao obter localização');
+    inputEnd.disabled = false;
+    inputEnd.placeholder = 'Ex: Savassi...';
+  });
+};
+
+// ==============================================
+// 📸 LÓGICA DO MODAL (CARROSSEL FIXADO + APPS)
+// ==============================================
+// ==============================================
+// 📸 LÓGICA DO MODAL (CARROSSEL FIXADO + APPS)
+// ==============================================
+let slideIndex = 0;
+
+async function abrirDetalhes(placeId) {
+    const modal = document.getElementById('modalDetalhes');
+    const modalBody = document.getElementById('modalBody');
+    const track = document.getElementById('carouselTrack');
+    
+    // 1. Abre o modal para o navegador calcular dimensões
+    modal.style.display = 'block';
+    
+    // 2. Reseta TUDO antes de buscar novos dados
+    modalBody.innerHTML = '<div style="text-align: center; padding: 40px; color: #888;">Carregando fotos e avaliações...</div>';
+    track.innerHTML = ''; 
+    track.style.transition = 'none'; // Remove animação para o reset instantâneo
+    track.style.transform = 'translateX(0px)';
+    slideIndex = 0;
+
+    try {
+        const res = await fetch(`/detalhes-lugar/${placeId}`);
+        const data = await res.json();
+        
+        if (data.erro) {
+            modalBody.innerHTML = `<p style="color:red; text-align:center;">${data.erro}</p>`;
+            return;
+        }
+
+        // 3. Adiciona as fotos DIRETAMENTE (Sem complexidade de onload)
+        if (data.fotos && data.fotos.length > 0) {
+            data.fotos.forEach(foto => {
+                const img = document.createElement('img');
+                img.src = foto;
+                img.className = 'carousel-item';
+                // Previne imagem quebrada
+                img.onerror = function() { this.src = 'https://via.placeholder.com/600x300/333/888?text=Imagem+Indisponível'; };
+                track.appendChild(img);
+            });
+        } else {
+            track.innerHTML = '<img src="https://via.placeholder.com/600x300/111/333?text=Sem+Fotos" class="carousel-item">';
+        }
+        
+        // Reativa a animação após o reset inicial
+        setTimeout(() => { track.style.transition = 'transform 0.3s ease-in-out'; }, 50);
+
+        // LINKS E REVIEWS
+        const encodedName = encodeURIComponent(data.nome);
+        const uberLink = `https://m.uber.com/ul/?action=setPickup&client_id=fugida_web&pickup=my_location&dropoff[latitude]=${data.lat}&dropoff[longitude]=${data.lng}&dropoff[nickname]=${encodedName}`;
+        const app99Link = `taxis99://call?end_lat=${data.lat}&end_lng=${data.lng}&end_name=${encodedName}`;
+
+        let reviewsHtml = '';
+        if (data.reviews && data.reviews.length > 0) {
+            reviewsHtml += '<div class="reviews-title">O que a galera fala</div>';
+            data.reviews.slice(0, 3).forEach(r => {
+                reviewsHtml += `
+                    <div class="review-item">
+                        <div class="review-header">
+                            <span>${r.author_name}</span>
+                            <span class="review-stars">${'⭐'.repeat(r.rating)}</span>
+                        </div>
+                        <div class="review-text">"${r.text}"</div>
+                    </div>
+                `;
+            });
+        } else {
+             reviewsHtml += '<div class="reviews-title">Sem avaliações recentes</div>';
+        }
+
+        modalBody.innerHTML = `
+            <h2 class="modal-title">${data.nome}</h2>
+            <p style="color:#888; font-size:13px; margin-bottom:15px;">${data.endereco}</p>
+            
+            <div class="modal-meta">
+                <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(data.nome + ' ' + data.endereco)}" target="_blank" class="tag" style="text-decoration:none; color:var(--primary); border-color:var(--primary); cursor:pointer;">
+                    📍 Ver no Maps
+                </a>
+                <a href="${uberLink}" target="_blank" class="app-btn app-uber">Uber</a>
+                <a href="${app99Link}" class="app-btn app-99">99</a>
+                <div class="tag">⭐ ${data.rating || 'Novo'}</div>
+                ${data.telefone ? `<div class="tag">📞 ${data.telefone}</div>` : ''}
+            </div>
+            ${reviewsHtml}
+        `;
+
+    } catch (e) {
+        console.error(e);
+        modalBody.innerHTML = '<p style="color:red; text-align:center;">Erro de conexão.</p>';
+    }
+}
+
+function fecharModal() {
+    document.getElementById('modalDetalhes').style.display = 'none';
+}
+
+function moveCarousel(direction) {
+    const track = document.getElementById('carouselTrack');
+    const carousel = document.querySelector('.carousel');
+    const items = document.querySelectorAll('.carousel-item');
+    
+    if (items.length <= 1) return;
+
+    slideIndex += direction;
+    if (slideIndex < 0) slideIndex = items.length - 1;
+    if (slideIndex >= items.length) slideIndex = 0;
+
+    // AQUI ESTÁ A MÁGICA: Pega a largura do CONTAINER VISÍVEL
+    const width = carousel.offsetWidth; 
+    track.style.transform = `translateX(-${slideIndex * width}px)`;
+}
+
+window.onclick = function(event) {
+    const modal = document.getElementById('modalDetalhes');
+    if (event.target == modal) fecharModal();
+}
+
+window.addEventListener('resize', () => {
+    // Recalcula se o usuário girar a tela
+    const track = document.getElementById('carouselTrack');
+    const carousel = document.querySelector('.carousel');
+    const items = document.querySelectorAll('.carousel-item');
+    if(items.length > 0) {
+        track.style.transition = 'none'; // Remove animação no resize para não "dançar"
+        track.style.transform = `translateX(-${slideIndex * carousel.offsetWidth}px)`;
+    }
+});
+
 </script>
 
 <% if (roteiros && roteiros.length > 0 && mapKey) { %>
 <script>
+  (g=>{var h,a,k,p="The Google Maps JavaScript API",c="google",l="importLibrary",q="__ib__",m=document,b=window;b=b[c]||(b[c]={});var d=b.maps||(b.maps={}),r=new Set,e=new URLSearchParams,u=()=>h||(h=new Promise(async(f,n)=>{await (a=m.createElement("script"));e.set("libraries",[...r]+"");for(k in g)e.set(k.replace(/[A-Z]/g,t=>"_"+t[0].toLowerCase()),g[k]);e.set("callback",c+".maps."+q);a.src=`https://maps.${c}apis.com/maps/api/js?`+e;d[q]=f;a.onerror=()=>h=n(Error(p+" could not load."));a.nonce=m.querySelector("script[nonce]")?.nonce||"";m.head.append(a)}));d[l]?console.warn(p+" only loads once. Ignoring:",g):d[l]=(f,...n)=>r.add(f)&&u().then(()=>d[l](f,...n))})({
+    key: "<%= mapKey %>",
+    v: "weekly",
+  });
+
   async function initMap() {
     const locais = <%- JSON.stringify(roteiros) %>;
-    
     if (!locais || locais.length === 0) return;
-
     const centerLat = parseFloat(locais[0].lat);
     const centerLng = parseFloat(locais[0].lng);
-    
     const { Map } = await google.maps.importLibrary("maps");
     const { AdvancedMarkerElement, PinElement } = await google.maps.importLibrary("marker");
 
     const map = new Map(document.getElementById("map"), {
-      zoom: 13,
-      center: { lat: centerLat, lng: centerLng },
-      mapId: "DEMO_MAP_ID", 
-      mapTypeId: 'roadmap',
-      styles: [
-        { elementType: "geometry", stylers: [{ color: "#242f3e" }] },
-        { elementType: "labels.text.stroke", stylers: [{ color: "#242f3e" }] },
-        { elementType: "labels.text.fill", stylers: [{ color: "#746855" }] },
-        { featureType: "administrative.locality", elementType: "labels.text.fill", stylers: [{ color: "#d59563" }] },
-        { featureType: "poi", elementType: "labels.text.fill", stylers: [{ color: "#d59563" }] },
-        { featureType: "poi.park", elementType: "geometry", stylers: [{ color: "#263c3f" }] },
-        { featureType: "poi.park", elementType: "labels.text.fill", stylers: [{ color: "#6b9a76" }] },
-        { featureType: "road", elementType: "geometry", stylers: [{ color: "#38414e" }] },
-        { featureType: "road", elementType: "geometry.stroke", stylers: [{ color: "#212a37" }] },
-        { featureType: "road", elementType: "labels.text.fill", stylers: [{ color: "#9ca5b3" }] },
-        { featureType: "road.highway", elementType: "geometry", stylers: [{ color: "#746855" }] },
-        { featureType: "road.highway", elementType: "geometry.stroke", stylers: [{ color: "#1f2835" }] },
-        { featureType: "road.highway", elementType: "labels.text.fill", stylers: [{ color: "#f3d19c" }] },
-        { featureType: "transit", elementType: "geometry", stylers: [{ color: "#2f3948" }] },
-        { featureType: "transit.station", elementType: "labels.text.fill", stylers: [{ color: "#d59563" }] },
-        { featureType: "water", elementType: "geometry", stylers: [{ color: "#17263c" }] },
-        { featureType: "water", elementType: "labels.text.fill", stylers: [{ color: "#515c6d" }] },
-        { featureType: "water", elementType: "labels.text.stroke", stylers: [{ color: "#17263c" }] }
-      ]
+      zoom: 13, center: { lat: centerLat, lng: centerLng }, mapId: "DEMO_MAP_ID", mapTypeId: 'roadmap',
+      styles: [{ elementType: "geometry", stylers: [{ color: "#242f3e" }] }, { elementType: "labels.text.stroke", stylers: [{ color: "#242f3e" }] }, { elementType: "labels.text.fill", stylers: [{ color: "#746855" }] }, { featureType: "road", elementType: "geometry", stylers: [{ color: "#38414e" }] }, { featureType: "road", elementType: "geometry.stroke", stylers: [{ color: "#212a37" }] }, { featureType: "road", elementType: "labels.text.fill", stylers: [{ color: "#9ca5b3" }] }]
     });
 
     locais.forEach((lugar, index) => {
-      const pin = new PinElement({
-        glyph: (index + 1).toString(),
-        background: '#FF6B35',
-        borderColor: '#E85D2C',
-        glyphColor: 'white',
-      });
-
-      const marker = new AdvancedMarkerElement({
-        map: map,
-        position: { lat: parseFloat(lugar.lat), lng: parseFloat(lugar.lng) },
-        title: lugar.nome,
-        content: pin.element
-      });
-
-      const infowindow = new google.maps.InfoWindow({
-        content: `<div style="color:black; padding:6px; max-width: 150px;">
-                    <strong style="font-size: 10.5px;">${lugar.nome}</strong><br>
-                    <span style="color: #FFB800; font-size: 9.75px;">⭐ ${lugar.rating}</span>
-                  </div>`
-      });
-
-      marker.addListener("click", () => {
-        infowindow.open(map, marker);
-      });
+      const pin = new PinElement({ glyph: (index + 1).toString(), background: '#FF6B35', borderColor: '#E85D2C', glyphColor: 'white' });
+      const marker = new AdvancedMarkerElement({ map: map, position: { lat: parseFloat(lugar.lat), lng: parseFloat(lugar.lng) }, title: lugar.nome, content: pin.element });
+      const infowindow = new google.maps.InfoWindow({ content: `<div style="color:black; padding:5px;"><strong>${lugar.nome}</strong></div>` });
+      marker.addListener("click", () => { infowindow.open(map, marker); });
     });
   }
+  initMap();
 </script>
-
-<script src="https://maps.googleapis.com/maps/api/js?key=<%= mapKey %>&callback=initMap&loading=async&v=weekly" async defer></script>
 <% } %>
 
 <%- include('layouts/footer.ejs') %>

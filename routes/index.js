@@ -3,7 +3,6 @@ var router = express.Router();
 const axios = require('axios');
 require('dotenv').config();
 
-// Função para embaralhar
 function shuffleArray(array) {
     for (let i = array.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -33,6 +32,46 @@ router.get('/', function(req, res) {
   });
 });
 
+router.get('/detalhes-lugar/:placeId', async function(req, res) {
+    const placesKey = process.env.GOOGLE_PLACES_API_KEY || process.env.GOOGLE_MAPS_API_KEY;
+    const placeId = req.params.placeId;
+
+    if (!placeId) return res.json({ erro: "ID não fornecido" });
+
+    try {
+        const url = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=name,rating,formatted_phone_number,photos,reviews,url,website,user_ratings_total,formatted_address,geometry&language=pt-BR&key=${placesKey}`;
+        const response = await axios.get(url);
+        
+        const data = response.data.result;
+        
+        if (!data) return res.json({ erro: "Local não encontrado no Google." });
+
+        let fotosProcessadas = [];
+        if (data.photos && data.photos.length > 0) {
+            fotosProcessadas = data.photos.map(foto => {
+                return `https://maps.googleapis.com/maps/api/place/photo?maxwidth=800&photoreference=${foto.photo_reference}&key=${placesKey}`;
+            });
+        }
+
+        res.json({
+            nome: data.name,
+            endereco: data.formatted_address,
+            rating: data.rating,
+            user_ratings_total: data.user_ratings_total,
+            telefone: data.formatted_phone_number,
+            website: data.website || data.url,
+            lat: data.geometry.location.lat,
+            lng: data.geometry.location.lng,
+            fotos: fotosProcessadas,
+            reviews: data.reviews || []
+        });
+
+    } catch (error) {
+        console.error("Erro ao buscar detalhes:", error.message);
+        res.json({ erro: "Erro ao carregar detalhes." });
+    }
+});
+
 router.post('/gerar-roteiro', async function(req, res) {
     let { vibe, latitude, longitude, enderecoManual, raiokm, excludedIds } = req.body;
     
@@ -40,7 +79,6 @@ router.post('/gerar-roteiro', async function(req, res) {
     let orcamento = parseFloat(orcamentoString);
     let lugaresJaVistos = excludedIds ? excludedIds.split(',') : [];
 
-    // Validar Inputs
     if (isNaN(orcamento) || orcamento <= 0) {
         return res.render('index', { 
             title: 'Fugida', roteiros: null, 
@@ -49,8 +87,6 @@ router.post('/gerar-roteiro', async function(req, res) {
     }
 
     const incluirUberNoOrcamento = req.body.incluirUber === 'on'; 
-    
-    // Configuração de chaves
     const mapsKey = process.env.GOOGLE_MAPS_API_KEY;
     const placesKey = process.env.GOOGLE_PLACES_API_KEY || mapsKey;
     const distanceKey = process.env.GOOGLE_DISTANCE_MATRIX || mapsKey;
@@ -62,18 +98,16 @@ router.post('/gerar-roteiro', async function(req, res) {
     try {
         let termoBusca = "";
         
-        // --- 1. RESOLVER LOCALIZAÇÃO (CORRIGIDO) ---
-        // A Lógica nova: Se tem endereço escrito (e não é o texto do GPS), 
-        // força a busca nova, IGNORANDO as lats/longs antigas que vieram no hidden input.
-        const isGpsText = enderecoManual && enderecoManual.includes("Localização Atual");
-        
-        if (enderecoManual && !isGpsText) {
+        if (latitude && longitude) {
+            if (enderecoManual && !enderecoManual.includes("Localização Atual")) {
+                termoBusca = enderecoManual.trim();
+            }
+        } 
+        else if (enderecoManual && !enderecoManual.includes("Localização Atual")) {
             termoBusca = enderecoManual.trim();
             if (!termoBusca.toLowerCase().includes('brazil') && !termoBusca.toLowerCase().includes('brasil')) {
                 termoBusca += ", Brasil";
             }
-            
-            console.log(`[GEO] Buscando novo endereço: ${termoBusca}`);
             const geoUrl = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(termoBusca)}&region=br&language=pt-BR&key=${mapsKey}`;
             const geoResponse = await axios.get(geoUrl);
             
@@ -81,20 +115,15 @@ router.post('/gerar-roteiro', async function(req, res) {
                 const loc = geoResponse.data.results[0].geometry.location;
                 latitude = loc.lat;
                 longitude = loc.lng;
-                // Importante: Atualizamos as variáveis latitude/longitude aqui
             } else {
-                throw new Error(`Endereço não encontrado: ${enderecoManual}`);
+                throw new Error(`Endereço não encontrado.`);
             }
         } 
-        // Se não digitou nada novo, aí sim verifica se tem coordenadas (GPS ou busca anterior)
-        else if (!latitude || !longitude) {
+        else {
             throw new Error("Localização necessária.");
         }
 
-        // --- 2. RAIO ---
         let raioMetros = raiokm ? parseInt(raiokm) * 1000 : 5000;
-
-        // --- 3. FILTRO DE PREÇO ---
         let priceFilter = "";
         let estimativaUber = 40; 
         let dinheiroLiquido = incluirUberNoOrcamento ? (orcamento - estimativaUber) : orcamento;
@@ -104,20 +133,15 @@ router.post('/gerar-roteiro', async function(req, res) {
         else if (dinheiroLiquido >= 80) priceFilter = "&maxprice=2"; 
         else priceFilter = "&maxprice=1"; 
 
-        // --- 4. BUSCA INICIAL ---
         let queryFinal = vibe;
         if (termoBusca) queryFinal = `${vibe} em ${termoBusca}`; 
-        // Nota: Se usou GPS, termoBusca é vazio, busca só pela "vibe" perto da lat/lng
 
         const placesUrl = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(queryFinal)}&location=${latitude},${longitude}&radius=${raioMetros}&openNow=true&language=pt-BR${priceFilter}&key=${placesKey}`;
         
-        console.log(`[PLACES] Buscando: ${queryFinal} (Lat: ${latitude}, Lng: ${longitude})`);
         let placesResponse = await axios.get(placesUrl);
         let resultados = placesResponse.data.results;
 
-        // Fallback
         if (!resultados || resultados.length === 0) {
-            console.log("[PLACES] Busca vazia. Tentando fallback...");
             const fallbackUrl = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(vibe)}&location=${latitude},${longitude}&radius=${raioMetros}&openNow=true&language=pt-BR&key=${placesKey}`;
             placesResponse = await axios.get(fallbackUrl);
             resultados = placesResponse.data.results;
@@ -126,11 +150,10 @@ router.post('/gerar-roteiro', async function(req, res) {
         if (!resultados || resultados.length === 0) throw new Error("Nenhum lugar encontrado.");
 
         let novosResultados = resultados.filter(place => !lugaresJaVistos.includes(place.place_id));
-        if (novosResultados.length === 0) throw new Error("Você já viu todas as opções dessa região!");
+        if (novosResultados.length === 0) throw new Error("Você já viu todas as opções!");
 
         let candidatos = shuffleArray(novosResultados);
 
-        // --- 5. DISTÂNCIA ---
         const destinations = candidatos.map(p => `place_id:${p.place_id}`).join('|');
         const distUrl = `https://maps.googleapis.com/maps/api/distancematrix/json?origins=${latitude},${longitude}&destinations=${destinations}&mode=driving&language=pt-BR&key=${distanceKey}`;
         const distResponse = await axios.get(distUrl);
@@ -139,7 +162,6 @@ router.post('/gerar-roteiro', async function(req, res) {
         const elementosDistancia = distResponse.data.rows[0].elements;
         let roteirosFinais = [];
 
-        // LOOP
         for (let i = 0; i < candidatos.length; i++) {
             const lugar = candidatos[i];
             const infoDist = elementosDistancia[i];
@@ -158,35 +180,11 @@ router.post('/gerar-roteiro', async function(req, res) {
                 if (incluirUberNoOrcamento && custoUberTotal > (orcamento * 0.45)) continue;
                 if (saldo < 15) continue; 
 
-                // --- LÓGICA DE FOTO OBRIGATÓRIA (FINAL) ---
                 let fotoUrl = null;
-                const lat = lugar.geometry.location.lat;
-                const lng = lugar.geometry.location.lng;
-
-                // 1. Tenta pegar a foto oficial (usando placesKey)
                 if (lugar.photos && lugar.photos.length > 0) {
                     fotoUrl = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=600&photoreference=${lugar.photos[0].photo_reference}&key=${placesKey}`;
-                } 
-                else {
-                    // 2. Deep Search se não veio no primeiro request
-                    try {
-                        const detailsUrl = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${lugar.place_id}&fields=name,photos&key=${placesKey}`;
-                        const detailsResponse = await axios.get(detailsUrl);
-                        
-                        if (detailsResponse.data.result && detailsResponse.data.result.photos && detailsResponse.data.result.photos.length > 0) {
-                            const ref = detailsResponse.data.result.photos[0].photo_reference;
-                            fotoUrl = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=600&photoreference=${ref}&key=${placesKey}`;
-                            console.log(`[FOTO] Deep Search achou: ${lugar.name}`);
-                        } 
-                    } catch (err) {
-                        console.error(`[FOTO] Erro Deep Search: ${lugar.name}`);
-                    }
-                }
-
-                // 3. Fallback Street View (usando mapsKey)
-                if (!fotoUrl) {
-                    console.log(`[FOTO] Usando Street View para: ${lugar.name}`);
-                    fotoUrl = `https://maps.googleapis.com/maps/api/streetview?size=600x400&location=${lat},${lng}&fov=80&source=outdoor&key=${mapsKey}`;
+                } else {
+                    fotoUrl = `https://maps.googleapis.com/maps/api/streetview?size=600x400&location=${lugar.geometry.location.lat},${lugar.geometry.location.lng}&fov=80&source=outdoor&key=${mapsKey}`;
                 }
 
                 roteirosFinais.push({
@@ -201,8 +199,8 @@ router.post('/gerar-roteiro', async function(req, res) {
                     foto: fotoUrl,
                     estimativa_preco: getEstimativaPreco(lugar.price_level),
                     incluirUber: incluirUberNoOrcamento,
-                    lat: lat,
-                    lng: lng
+                    lat: lugar.geometry.location.lat,
+                    lng: lugar.geometry.location.lng
                 });
             }
         }
@@ -210,7 +208,7 @@ router.post('/gerar-roteiro', async function(req, res) {
         roteirosFinais.sort((a, b) => b.rating - a.rating);
 
         if (roteirosFinais.length === 0) {
-            throw new Error("Não encontramos lugares neste raio/preço. Tente aumentar o raio ou o orçamento.");
+            throw new Error("Não encontramos lugares neste raio/preço.");
         }
 
         res.render('index', { 

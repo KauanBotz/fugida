@@ -1,4 +1,42 @@
-       </div>
-	</div>
-	</body>
-</html>	
+<footer class="footer">
+  <div class="footer-inner">
+    <span>© <%= new Date().getFullYear() %> FUGIDA. Todos os direitos reservados.</span>
+    <span>
+      Dados reais fornecidos por serviços do Google.
+    </span>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    margin-top: 80px;
+    padding: 30px 20px;
+    border-top: 1px solid rgba(255,255,255,0.08);
+    background: rgba(0,0,0,0.2);
+    backdrop-filter: blur(10px);
+  }
+
+  .footer-inner {
+    max-width: 800px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    text-align: center;
+    font-size: 11.5px;
+    color: #888;
+    line-height: 1.5;
+  }
+
+  .footer-inner span {
+    opacity: 0.85;
+  }
+
+  @media (min-width: 600px) {
+    .footer-inner {
+      flex-direction: row;
+      justify-content: space-between;
+      text-align: left;
+    }
+  }
+</style>
