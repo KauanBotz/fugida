@@ -130,7 +130,7 @@
             src="<%= item.foto %>" 
             alt="<%= item.nome %>" 
             class="place-image"
-            onerror="this.onerror=null; this.src='https://maps.googleapis.com/maps/api/staticmap?center=<%= item.lat %>,<%= item.lng %>&zoom=17&size=600x300&markers=color:red%7C<%= item.lat %>,<%= item.lng %>&maptype=roadmap&key=<%= mapKey %>';"
+            onerror="this.onerror=null; this.src='https://maps.googleapis.com/maps/api/streetview?size=600x400&location=<%= item.lat %>,<%= item.lng %>&fov=80&source=outdoor&key=<%= mapKey %>';"
           >
           <div class="place-content">
             <span class="rating-badge">⭐ <%= item.rating %></span>
@@ -162,28 +162,26 @@
 
     <div style="text-align: center; margin-bottom: 45px;">
         <button id="btnOther" class="submit-btn" style="max-width: 300px; margin: 0 auto; background: linear-gradient(135deg, #333, #222);">
-            Exibir novas sugestões.
+            Exibir novas sugestões
         </button>
     </div>
   <% } %>
 
   <% if (erro) { %>
     <div style="max-width: 450px; margin: 30px auto; padding: 15px; background: rgba(255, 107, 53, 0.1); border: 1px solid var(--primary); border-radius: 12px; text-align: center;">
-      <strong style="color: var(--primary); font-size: 12px;">Pesquise novamente</strong> 
+      <strong style="color: var(--primary); font-size: 12px;">⚠️ Erro:</strong> 
       <p style="margin-top: 6px; color: var(--text); font-size: 11.25px;"><%= erro %></p>
     </div>
   <% } %>
 </div>
 
 <script>
-// CONTROLE DO SLIDER DO RAIO
 const raioInput = document.getElementById('raioInput');
 const raioValor = document.getElementById('raioValor');
 raioInput.addEventListener('input', (e) => {
     raioValor.innerText = e.target.value;
 });
 
-// GEOLOCALIZAÇÃO
 const btnGps = document.getElementById('btnGps');
 const inputEnd = document.getElementById('enderecoManual');
 const latitude = document.getElementById('latitude');
@@ -207,29 +205,22 @@ btnGps.onclick = () => {
   });
 };
 
-// CORREÇÃO 3: LÓGICA DE NOVA PESQUISA (LIMPA MEMÓRIA)
 const btnProcurar = document.getElementById('btnProcurar');
 btnProcurar.onclick = () => {
-    // Se clicar em PROCURAR, a gente limpa os IDs excluídos para começar do zero
     document.getElementById('excludedIds').value = "";
 };
 
-// CORREÇÃO 4: LÓGICA DE "MANDA OUTROS" (MANTÉM MEMÓRIA)
 const btnOther = document.getElementById('btnOther');
 if(btnOther) {
     btnOther.onclick = () => {
         const form = document.getElementById('mainForm');
         const excludedInput = document.getElementById('excludedIds');
-        
-        // Pega os IDs atuais da tela (usando JSON parse seguro)
         const roteirosAtuais = <%- roteiros ? JSON.stringify(roteiros) : '[]' %>;
         const currentIds = roteirosAtuais.map(r => r.id);
         
-        // Junta com os que já estavam excluídos antes
         let existing = excludedInput.value ? excludedInput.value.split(',') : [];
         let updated = existing.concat(currentIds);
         
-        // Atualiza o input escondido e submete o formulário com os mesmos dados de antes
         excludedInput.value = updated.join(',');
         form.submit();
     }

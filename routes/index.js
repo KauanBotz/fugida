@@ -49,36 +49,45 @@ router.post('/gerar-roteiro', async function(req, res) {
     }
 
     const incluirUberNoOrcamento = req.body.incluirUber === 'on'; 
-    const keyPlaces = process.env.GOOGLE_PLACES_API_KEY;
-    const keyDistance = process.env.GOOGLE_DISTANCE_MATRIX;
-    const keyGeo = process.env.GOOGLE_MAPS_API_KEY || keyPlaces;
+    
+    // Configuração de chaves
+    const mapsKey = process.env.GOOGLE_MAPS_API_KEY;
+    const placesKey = process.env.GOOGLE_PLACES_API_KEY || mapsKey;
+    const distanceKey = process.env.GOOGLE_DISTANCE_MATRIX || mapsKey;
 
-    if (!keyPlaces || !keyDistance) {
-        return res.render('index', { title: 'Fugida', roteiros: null, erro: "Chaves de API ausentes.", dadosBusca: req.body, mapKey: process.env.GOOGLE_MAPS_API_KEY });
+    if (!mapsKey) {
+        return res.render('index', { title: 'Fugida', roteiros: null, erro: "Chave GOOGLE_MAPS_API_KEY ausente.", dadosBusca: req.body, mapKey: null });
     }
 
     try {
         let termoBusca = "";
         
-        // --- 1. RESOLVER LOCALIZAÇÃO ---
-        if (enderecoManual && enderecoManual !== "Localização Atual (GPS Ativo)" && (!latitude || !longitude)) {
+        // --- 1. RESOLVER LOCALIZAÇÃO (CORRIGIDO) ---
+        // A Lógica nova: Se tem endereço escrito (e não é o texto do GPS), 
+        // força a busca nova, IGNORANDO as lats/longs antigas que vieram no hidden input.
+        const isGpsText = enderecoManual && enderecoManual.includes("Localização Atual");
+        
+        if (enderecoManual && !isGpsText) {
             termoBusca = enderecoManual.trim();
             if (!termoBusca.toLowerCase().includes('brazil') && !termoBusca.toLowerCase().includes('brasil')) {
                 termoBusca += ", Brasil";
             }
             
-            console.log(`[GEO] Buscando: ${termoBusca}`);
-            const geoUrl = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(termoBusca)}&region=br&language=pt-BR&key=${keyGeo}`;
+            console.log(`[GEO] Buscando novo endereço: ${termoBusca}`);
+            const geoUrl = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(termoBusca)}&region=br&language=pt-BR&key=${mapsKey}`;
             const geoResponse = await axios.get(geoUrl);
             
             if (geoResponse.data.status === 'OK' && geoResponse.data.results.length > 0) {
                 const loc = geoResponse.data.results[0].geometry.location;
                 latitude = loc.lat;
                 longitude = loc.lng;
+                // Importante: Atualizamos as variáveis latitude/longitude aqui
             } else {
                 throw new Error(`Endereço não encontrado: ${enderecoManual}`);
             }
-        } else if (!latitude || !longitude) {
+        } 
+        // Se não digitou nada novo, aí sim verifica se tem coordenadas (GPS ou busca anterior)
+        else if (!latitude || !longitude) {
             throw new Error("Localização necessária.");
         }
 
@@ -97,18 +106,19 @@ router.post('/gerar-roteiro', async function(req, res) {
 
         // --- 4. BUSCA INICIAL ---
         let queryFinal = vibe;
-        if (termoBusca) queryFinal = `${vibe} em ${termoBusca}`;
+        if (termoBusca) queryFinal = `${vibe} em ${termoBusca}`; 
+        // Nota: Se usou GPS, termoBusca é vazio, busca só pela "vibe" perto da lat/lng
 
-        const placesUrl = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(queryFinal)}&location=${latitude},${longitude}&radius=${raioMetros}&openNow=true&language=pt-BR${priceFilter}&key=${keyPlaces}`;
+        const placesUrl = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(queryFinal)}&location=${latitude},${longitude}&radius=${raioMetros}&openNow=true&language=pt-BR${priceFilter}&key=${placesKey}`;
         
-        console.log(`[PLACES] Iniciando busca...`);
+        console.log(`[PLACES] Buscando: ${queryFinal} (Lat: ${latitude}, Lng: ${longitude})`);
         let placesResponse = await axios.get(placesUrl);
         let resultados = placesResponse.data.results;
 
         // Fallback
         if (!resultados || resultados.length === 0) {
             console.log("[PLACES] Busca vazia. Tentando fallback...");
-            const fallbackUrl = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(vibe)}&location=${latitude},${longitude}&radius=${raioMetros}&openNow=true&language=pt-BR&key=${keyPlaces}`;
+            const fallbackUrl = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(vibe)}&location=${latitude},${longitude}&radius=${raioMetros}&openNow=true&language=pt-BR&key=${placesKey}`;
             placesResponse = await axios.get(fallbackUrl);
             resultados = placesResponse.data.results;
         }
@@ -122,14 +132,14 @@ router.post('/gerar-roteiro', async function(req, res) {
 
         // --- 5. DISTÂNCIA ---
         const destinations = candidatos.map(p => `place_id:${p.place_id}`).join('|');
-        const distUrl = `https://maps.googleapis.com/maps/api/distancematrix/json?origins=${latitude},${longitude}&destinations=${destinations}&mode=driving&language=pt-BR&key=${keyDistance}`;
+        const distUrl = `https://maps.googleapis.com/maps/api/distancematrix/json?origins=${latitude},${longitude}&destinations=${destinations}&mode=driving&language=pt-BR&key=${distanceKey}`;
         const distResponse = await axios.get(distUrl);
         
         if (!distResponse.data.rows) throw new Error("Erro API Matrix.");
         const elementosDistancia = distResponse.data.rows[0].elements;
         let roteirosFinais = [];
 
-        // LOOP DE PROCESSAMENTO
+        // LOOP
         for (let i = 0; i < candidatos.length; i++) {
             const lugar = candidatos[i];
             const infoDist = elementosDistancia[i];
@@ -148,38 +158,35 @@ router.post('/gerar-roteiro', async function(req, res) {
                 if (incluirUberNoOrcamento && custoUberTotal > (orcamento * 0.45)) continue;
                 if (saldo < 15) continue; 
 
-                // --- LÓGICA DE FOTO OBRIGATÓRIA (COM LOGS) ---
+                // --- LÓGICA DE FOTO OBRIGATÓRIA (FINAL) ---
                 let fotoUrl = null;
                 const lat = lugar.geometry.location.lat;
                 const lng = lugar.geometry.location.lng;
 
-                // TENTATIVA 1: Busca Inicial
+                // 1. Tenta pegar a foto oficial (usando placesKey)
                 if (lugar.photos && lugar.photos.length > 0) {
-                    fotoUrl = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=600&photoreference=${lugar.photos[0].photo_reference}&key=${keyPlaces}`;
-                    // console.log(`[FOTO] OK (Busca Simples): ${lugar.name}`);
+                    fotoUrl = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=600&photoreference=${lugar.photos[0].photo_reference}&key=${placesKey}`;
                 } 
                 else {
-                    // TENTATIVA 2: Busca Profunda (Details)
+                    // 2. Deep Search se não veio no primeiro request
                     try {
-                        const detailsUrl = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${lugar.place_id}&fields=name,photos&key=${keyPlaces}`;
+                        const detailsUrl = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${lugar.place_id}&fields=name,photos&key=${placesKey}`;
                         const detailsResponse = await axios.get(detailsUrl);
                         
                         if (detailsResponse.data.result && detailsResponse.data.result.photos && detailsResponse.data.result.photos.length > 0) {
                             const ref = detailsResponse.data.result.photos[0].photo_reference;
-                            fotoUrl = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=600&photoreference=${ref}&key=${keyPlaces}`;
-                            console.log(`[FOTO] RECUPERADA (Deep Search): ${lugar.name}`);
-                        } else {
-                            console.log(`[FOTO] SEM FOTO OFICIAL: ${lugar.name}`);
-                        }
+                            fotoUrl = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=600&photoreference=${ref}&key=${placesKey}`;
+                            console.log(`[FOTO] Deep Search achou: ${lugar.name}`);
+                        } 
                     } catch (err) {
-                        console.error(`[FOTO] ERRO API DETAILS: ${lugar.name}`);
+                        console.error(`[FOTO] Erro Deep Search: ${lugar.name}`);
                     }
                 }
 
-                // TENTATIVA 3: Fallback Mapa Estático (GARANTIA FINAL)
+                // 3. Fallback Street View (usando mapsKey)
                 if (!fotoUrl) {
-                    console.log(`[FOTO] USANDO MAPA ESTÁTICO: ${lugar.name}`);
-                    fotoUrl = `https://maps.googleapis.com/maps/api/staticmap?center=${lat},${lng}&zoom=17&size=600x300&markers=color:red%7C${lat},${lng}&maptype=roadmap&key=${keyGeo}`;
+                    console.log(`[FOTO] Usando Street View para: ${lugar.name}`);
+                    fotoUrl = `https://maps.googleapis.com/maps/api/streetview?size=600x400&location=${lat},${lng}&fov=80&source=outdoor&key=${mapsKey}`;
                 }
 
                 roteirosFinais.push({
@@ -203,7 +210,7 @@ router.post('/gerar-roteiro', async function(req, res) {
         roteirosFinais.sort((a, b) => b.rating - a.rating);
 
         if (roteirosFinais.length === 0) {
-            throw new Error("No momento, não há locais disponíveis que atendam ao orçamento definido dentro desse raio de busca.");
+            throw new Error("Não encontramos lugares neste raio/preço. Tente aumentar o raio ou o orçamento.");
         }
 
         res.render('index', { 
@@ -211,7 +218,7 @@ router.post('/gerar-roteiro', async function(req, res) {
             roteiros: roteirosFinais, 
             erro: null,
             dadosBusca: { ...req.body, latitude, longitude },
-            mapKey: process.env.GOOGLE_MAPS_API_KEY
+            mapKey: mapsKey
         });
 
     } catch (error) {
