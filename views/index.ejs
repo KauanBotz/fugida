@@ -62,7 +62,7 @@
   @keyframes spin { to { transform: rotate(360deg); } }
 
   /* =========================================
-     4. RESULTADOS
+     4. RESULTADOS (Cards)
      ========================================= */
   .results-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; margin-bottom: 60px; }
   
@@ -90,12 +90,71 @@
   .price-tag { display: flex; justify-content: space-between; align-items: center; font-size: 13px; padding-top: 12px; border-top: 1px solid #2a2a2a; margin-top: auto; }
   .money-left { color: #10b981; font-weight: 700; }
   
-  .click-hint { font-size: 11px; color: var(--primary); text-align: center; margin-top: 10px; font-weight: 600; opacity: 0.8; }
+  /* CORREÇÃO PADDING E UBER */
+  .uber-info-card { font-size: 11px; color: #ccc; margin-top: 5px; display: flex; align-items: center; gap: 5px; }
+  .click-hint { font-size: 11px; color: var(--primary); text-align: center; margin-top: 20px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.05); font-weight: 600; opacity: 0.8; }
 
   #map { width: 100%; height: 280px; border-radius: 16px; margin-bottom: 30px; border: 1px solid var(--border); filter: grayscale(20%); }
 
   /* =========================================
-     5. MODAL, CARROSSEL (CORRIGIDO) E APPS
+     5. NOVO CARROSSEL (SCROLL SNAP - ESTÁVEL)
+     ========================================= */
+  .carousel-container {
+    position: relative;
+    width: 100%;
+    height: 320px;
+    background: #000;
+    border-radius: 20px 20px 0 0;
+  }
+
+  /* Container que rola */
+  .carousel-track {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    overflow-x: auto; /* Permite rolar pro lado */
+    scroll-snap-type: x mandatory; /* Força parar na foto */
+    scroll-behavior: smooth; /* Rolagem suave via JS */
+    scrollbar-width: none; /* Esconde barra no Firefox */
+  }
+  .carousel-track::-webkit-scrollbar { display: none; /* Esconde barra no Chrome */ }
+
+  /* Cada slide */
+  .carousel-item {
+    flex: 0 0 100%;
+    min-width: 100%; /* GARANTIA DE LARGURA */
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    scroll-snap-align: center;
+    background-color: #222; /* Fundo cinza se a imagem demorar */
+  }
+
+  /* Botões de navegação */
+  .carousel-btn { 
+    position: absolute; 
+    top: 50%; 
+    transform: translateY(-50%); 
+    background: rgba(0,0,0,0.6); 
+    border: 1px solid rgba(255,255,255,0.2); 
+    color: white; 
+    width: 40px; 
+    height: 40px; 
+    border-radius: 50%; 
+    cursor: pointer; 
+    font-size: 18px; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    transition: 0.2s; 
+    z-index: 5; 
+  }
+  .carousel-btn:hover { background: var(--primary); border-color: var(--primary); }
+  .prev-btn { left: 15px; }
+  .next-btn { right: 15px; }
+
+  /* =========================================
+     6. MODAL & APPS
      ========================================= */
   .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.85); backdrop-filter: blur(8px); }
   .modal-content { position: relative; background: #121212; margin: 5% auto; padding: 0; border: 1px solid #333; width: 95%; max-width: 650px; border-radius: 20px; box-shadow: 0 25px 50px rgba(0,0,0,0.5); animation: slideUp 0.3s ease-out; }
@@ -104,45 +163,30 @@
   .modal-close { position: absolute; top: 15px; right: 15px; background: rgba(0,0,0,0.5); width: 32px; height: 32px; border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 10; font-size: 20px; transition: 0.2s; }
   .modal-close:hover { background: var(--primary); }
 
-  /* --- CSS DO CARROSSEL REFORMULADO --- */
-.carousel { 
-    position: relative; 
-    width: 100%; 
-    height: 320px; 
-    overflow: hidden; 
-    border-radius: 20px 20px 0 0; 
-    background: #000; 
-  }
-
-.carousel-track { 
-    display: flex; 
-    transition: transform 0.3s ease-in-out; 
-    /* IMPORTANTE: Removemos width: 100% e height fixa para a fita fluir */
-    width: max-content; 
-    height: 100%;
-  }
-
-.carousel-item { 
-    /* O SEGREDO: flex: 0 0 100% força a imagem a ter o tamanho exato do container pai */
-    flex: 0 0 100%;
-    width: 100%; /* Fallback */
-    height: 100%; 
-    object-fit: cover; 
-    display: block; 
-  }
-  
-  .carousel-btn { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.2); color: white; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; transition: 0.2s; z-index: 5; }
-  .carousel-btn:hover { background: var(--primary); border-color: var(--primary); }
-  .prev-btn { left: 15px; }
-  .next-btn { right: 15px; }
-
   .modal-body { padding: 30px; }
   .modal-title { font-size: 24px; font-weight: 800; margin-bottom: 5px; color: #fff; }
   
   .modal-meta { display: flex; gap: 8px; margin-bottom: 25px; flex-wrap: wrap; }
   .tag { background: #222; padding: 6px 14px; border-radius: 20px; font-size: 12px; color: #ddd; border: 1px solid #333; display: flex; align-items: center; gap: 6px; }
   
-  /* ESTILO DOS BOTÕES DE APP (TEXTO + CORES) */
+  /* BOXES DE FINANÇAS NO MODAL */
+  .finance-box {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid #333;
+      padding: 15px;
+      border-radius: 12px;
+      margin-bottom: 25px;
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+  }
+  .finance-item { text-align: center; flex: 1; border-right: 1px solid #333; }
+  .finance-item:last-child { border-right: none; }
+  .finance-label { font-size: 10px; text-transform: uppercase; color: #888; font-weight: 700; margin-bottom: 4px; }
+  .finance-value { font-size: 14px; font-weight: 700; color: #fff; }
+  .finance-value.money { color: #10b981; }
+  .finance-value.cost { color: #FFB800; }
+  
   .app-btn {
     text-decoration: none;
     font-size: 13px;
@@ -164,7 +208,10 @@
 
   @media(max-width: 768px) {
     .grid-2 { grid-template-columns: 1fr; }
-    .carousel { height: 220px; }
+    .carousel-container { height: 250px; }
+    .finance-box { flex-direction: column; gap: 15px; }
+    .finance-item { border-right: none; border-bottom: 1px solid #333; padding-bottom: 10px; }
+    .finance-item:last-child { border-bottom: none; padding-bottom: 0; }
   }
 </style>
 
@@ -242,7 +289,13 @@
 
     <div class="results-grid">
       <% roteiros.forEach(item => { %>
-        <div class="place-card" onclick="abrirDetalhes('<%= item.id %>')">
+        <div class="place-card" onclick="abrirDetalhes(
+          '<%= item.id %>', 
+          '<%= item.precoUber %>', 
+          '<%= item.saldo %>', 
+          '<%= (typeof dadosBusca !== 'undefined' && dadosBusca && dadosBusca.orcamento) ? dadosBusca.orcamento : 0 %>',
+          '<%= item.estimativa_preco %>'
+        )">
           <img 
             src="<%= item.foto %>" 
             class="place-img" 
@@ -258,6 +311,11 @@
             <div class="price-tag">
               <span style="color: #FFB800;"><%= item.estimativa_preco %></span>
               <span class="money-left">Sobra: R$ <%= item.saldo %></span>
+            </div>
+            
+            <div class="uber-info-card">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm1-7h-2v2h2V10zm0 4h-2v2h2v-2z"/></svg>
+              Uber (ida/volta): R$ <%= item.precoUber %>
             </div>
             
             <div class="click-hint">Ver detalhes</div>
@@ -284,10 +342,10 @@
     <div class="modal-content">
         <div class="modal-close" onclick="fecharModal()">×</div>
         
-        <div class="carousel">
+        <div class="carousel-container">
             <div class="carousel-track" id="carouselTrack"></div>
-            <button class="carousel-btn prev-btn" onclick="moveCarousel(-1)">❮</button>
-            <button class="carousel-btn next-btn" onclick="moveCarousel(1)">❯</button>
+            <button class="carousel-btn prev-btn" onclick="scrollCarousel(-1)">❮</button>
+            <button class="carousel-btn next-btn" onclick="scrollCarousel(1)">❯</button>
         </div>
 
         <div class="modal-body" id="modalBody">
@@ -393,27 +451,21 @@ btnGps.onclick = () => {
 };
 
 // ==============================================
-// 📸 LÓGICA DO MODAL (CARROSSEL FIXADO + APPS)
-// ==============================================
-// ==============================================
-// 📸 LÓGICA DO MODAL (CARROSSEL FIXADO + APPS)
+// 📸 LÓGICA DO MODAL (ESTRUTURA REFEITA)
 // ==============================================
 let slideIndex = 0;
 
-async function abrirDetalhes(placeId) {
+// Agora aceita Orçamento e Custo Uber como parametros
+async function abrirDetalhes(placeId, uberPrice, saldo, budget, avgPrice) {
     const modal = document.getElementById('modalDetalhes');
     const modalBody = document.getElementById('modalBody');
     const track = document.getElementById('carouselTrack');
     
-    // 1. Abre o modal para o navegador calcular dimensões
     modal.style.display = 'block';
     
-    // 2. Reseta TUDO antes de buscar novos dados
     modalBody.innerHTML = '<div style="text-align: center; padding: 40px; color: #888;">Carregando fotos e avaliações...</div>';
     track.innerHTML = ''; 
-    track.style.transition = 'none'; // Remove animação para o reset instantâneo
-    track.style.transform = 'translateX(0px)';
-    slideIndex = 0;
+    track.scrollLeft = 0;
 
     try {
         const res = await fetch(`/detalhes-lugar/${placeId}`);
@@ -424,28 +476,27 @@ async function abrirDetalhes(placeId) {
             return;
         }
 
-        // 3. Adiciona as fotos DIRETAMENTE (Sem complexidade de onload)
+        // ✅ AGORA AS FOTOS JÁ VÊM COM O PROXY APLICADO!
         if (data.fotos && data.fotos.length > 0) {
             data.fotos.forEach(foto => {
                 const img = document.createElement('img');
-                img.src = foto;
+                img.src = foto; // ← JÁ É O PROXY, NÃO PRECISA ALTERAR
                 img.className = 'carousel-item';
-                // Previne imagem quebrada
-                img.onerror = function() { this.src = 'https://via.placeholder.com/600x300/333/888?text=Imagem+Indisponível'; };
+                img.onerror = function() { 
+                    this.src = 'https://via.placeholder.com/600x300/333/888?text=Imagem+Indisponível'; 
+                };
                 track.appendChild(img);
             });
         } else {
             track.innerHTML = '<img src="https://via.placeholder.com/600x300/111/333?text=Sem+Fotos" class="carousel-item">';
         }
-        
-        // Reativa a animação após o reset inicial
-        setTimeout(() => { track.style.transition = 'transform 0.3s ease-in-out'; }, 50);
 
-        // LINKS E REVIEWS
+        // Links de App
         const encodedName = encodeURIComponent(data.nome);
         const uberLink = `https://m.uber.com/ul/?action=setPickup&client_id=fugida_web&pickup=my_location&dropoff[latitude]=${data.lat}&dropoff[longitude]=${data.lng}&dropoff[nickname]=${encodedName}`;
         const app99Link = `taxis99://call?end_lat=${data.lat}&end_lng=${data.lng}&end_name=${encodedName}`;
 
+        // Reviews
         let reviewsHtml = '';
         if (data.reviews && data.reviews.length > 0) {
             reviewsHtml += '<div class="reviews-title">O que a galera fala</div>';
@@ -464,10 +515,30 @@ async function abrirDetalhes(placeId) {
              reviewsHtml += '<div class="reviews-title">Sem avaliações recentes</div>';
         }
 
+        // MONTA O HTML COM A NOVA CAIXA FINANCEIRA
         modalBody.innerHTML = `
             <h2 class="modal-title">${data.nome}</h2>
             <p style="color:#888; font-size:13px; margin-bottom:15px;">${data.endereco}</p>
             
+            <div class="finance-box">
+                <div class="finance-item">
+                    <div class="finance-label">Seu Orçamento</div>
+                    <div class="finance-value">R$ ${budget}</div>
+                </div>
+                <div class="finance-item">
+                    <div class="finance-label">Uber (Ida/Volta)</div>
+                    <div class="finance-value">R$ ${uberPrice}</div>
+                </div>
+                <div class="finance-item">
+                    <div class="finance-label">Custo do Local</div>
+                    <div class="finance-value cost">${avgPrice}</div>
+                </div>
+                <div class="finance-item">
+                    <div class="finance-label">Saldo Livre</div>
+                    <div class="finance-value money">R$ ${saldo}</div>
+                </div>
+            </div>
+
             <div class="modal-meta">
                 <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(data.nome + ' ' + data.endereco)}" target="_blank" class="tag" style="text-decoration:none; color:var(--primary); border-color:var(--primary); cursor:pointer;">
                     📍 Ver no Maps
@@ -477,6 +548,7 @@ async function abrirDetalhes(placeId) {
                 <div class="tag">⭐ ${data.rating || 'Novo'}</div>
                 ${data.telefone ? `<div class="tag">📞 ${data.telefone}</div>` : ''}
             </div>
+            
             ${reviewsHtml}
         `;
 
@@ -490,38 +562,22 @@ function fecharModal() {
     document.getElementById('modalDetalhes').style.display = 'none';
 }
 
-function moveCarousel(direction) {
+// NOVA FUNÇÃO DE SCROLL (MUITO MAIS SIMPLES E EFICIENTE)
+function scrollCarousel(direction) {
     const track = document.getElementById('carouselTrack');
-    const carousel = document.querySelector('.carousel');
-    const items = document.querySelectorAll('.carousel-item');
+    const width = track.offsetWidth;
     
-    if (items.length <= 1) return;
-
-    slideIndex += direction;
-    if (slideIndex < 0) slideIndex = items.length - 1;
-    if (slideIndex >= items.length) slideIndex = 0;
-
-    // AQUI ESTÁ A MÁGICA: Pega a largura do CONTAINER VISÍVEL
-    const width = carousel.offsetWidth; 
-    track.style.transform = `translateX(-${slideIndex * width}px)`;
+    // Rola suavemente para o lado
+    track.scrollBy({
+        left: direction * width,
+        behavior: 'smooth'
+    });
 }
 
 window.onclick = function(event) {
     const modal = document.getElementById('modalDetalhes');
     if (event.target == modal) fecharModal();
 }
-
-window.addEventListener('resize', () => {
-    // Recalcula se o usuário girar a tela
-    const track = document.getElementById('carouselTrack');
-    const carousel = document.querySelector('.carousel');
-    const items = document.querySelectorAll('.carousel-item');
-    if(items.length > 0) {
-        track.style.transition = 'none'; // Remove animação no resize para não "dançar"
-        track.style.transform = `translateX(-${slideIndex * carousel.offsetWidth}px)`;
-    }
-});
-
 </script>
 
 <% if (roteiros && roteiros.length > 0 && mapKey) { %>
