@@ -225,7 +225,7 @@
 
   <section class="hero">
     <h1>Seu próximo rolê<br><span class="gradient-text">decidido em segundos</span></h1>
-    <p>Encontre os melhores lugares para sair hoje, com custo total calculado e sugestões personalizadas</p>
+    <p>Encontre os melhores lugares para sair hoje, perto de você, com custo total calculado e sugestões personalizadas.</p>
   </section>
 
   <div class="search-card">
@@ -236,7 +236,7 @@
 
       <div class="input-wrapper">
         <label>Onde você está?</label>
-        <input type="text" name="enderecoManual" id="enderecoManual" placeholder="Ex: Savassi, Belo Horizonte..." value="<%= (typeof dadosBusca !== 'undefined' && dadosBusca && dadosBusca.enderecoManual) ? dadosBusca.enderecoManual : '' %>">
+        <input type="text" name="enderecoManual" id="enderecoManual" placeholder="Ex: Bairro, Cidade..." value="<%= (typeof dadosBusca !== 'undefined' && dadosBusca && dadosBusca.enderecoManual) ? dadosBusca.enderecoManual : '' %>">
         
         <button type="button" class="gps-btn" id="btnGps" title="Localização Atual">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
@@ -248,14 +248,14 @@
 
       <div class="grid-2">
         <div style="position: relative;">
-          <label>Qual a vibe?</label>
+          <label>O que deseja hoje?</label>
           <select name="vibe">
-            <option value="restaurante barzinho" <%= (typeof dadosBusca !== 'undefined' && dadosBusca && dadosBusca.vibe === 'restaurante barzinho') ? 'selected' : '' %>>🍻 Barzinho</option>
-            <option value="restaurante romântico" <%= (typeof dadosBusca !== 'undefined' && dadosBusca && dadosBusca.vibe === 'restaurante romântico') ? 'selected' : '' %>>❤️ Date</option>
-            <option value="hamburgueria pizza" <%= (typeof dadosBusca !== 'undefined' && dadosBusca && dadosBusca.vibe === 'hamburgueria pizza') ? 'selected' : '' %>>🍔 Larica</option>
-            <option value="parque ar livre" <%= (typeof dadosBusca !== 'undefined' && dadosBusca && dadosBusca.vibe === 'parque ar livre') ? 'selected' : '' %>>🌳 Ar livre</option>
-            <option value="balada festa" <%= (typeof dadosBusca !== 'undefined' && dadosBusca && dadosBusca.vibe === 'balada festa') ? 'selected' : '' %>>🎉 Festa</option>
-            <option value="museu cultura cinema" <%= (typeof dadosBusca !== 'undefined' && dadosBusca && dadosBusca.vibe === 'museu cultura cinema') ? 'selected' : '' %>>🏛️ Cultura</option>
+            <option value="restaurante barzinho" <%= (typeof dadosBusca !== 'undefined' && dadosBusca && dadosBusca.vibe === 'restaurante barzinho') ? 'selected' : '' %>>Bares</option>
+            <option value="restaurante romântico" <%= (typeof dadosBusca !== 'undefined' && dadosBusca && dadosBusca.vibe === 'restaurante romântico') ? 'selected' : '' %>>Restaurante</option>
+            <option value="hamburgueria pizza" <%= (typeof dadosBusca !== 'undefined' && dadosBusca && dadosBusca.vibe === 'hamburgueria pizza') ? 'selected' : '' %>>Lanchonete</option>
+            <option value="parque ar livre" <%= (typeof dadosBusca !== 'undefined' && dadosBusca && dadosBusca.vibe === 'parque ar livre') ? 'selected' : '' %>>Ar livre</option>
+            <option value="balada festa" <%= (typeof dadosBusca !== 'undefined' && dadosBusca && dadosBusca.vibe === 'balada festa') ? 'selected' : '' %>>Festa</option>
+            <option value="museu cultura cinema" <%= (typeof dadosBusca !== 'undefined' && dadosBusca && dadosBusca.vibe === 'museu cultura cinema') ? 'selected' : '' %>>Cultura</option>
           </select>
         </div>
 
@@ -271,7 +271,7 @@
            <input type="range" name="raiokm" id="raioInput" min="1" max="30" value="<%= (typeof dadosBusca !== 'undefined' && dadosBusca && dadosBusca.raiokm) ? dadosBusca.raiokm : '5' %>" style="vertical-align: middle; margin-left: 10px;">
         </div>
         <label class="checkbox-label">
-          <input type="checkbox" name="incluirUber" id="incluirUber" <%= (typeof dadosBusca !== 'undefined' && dadosBusca && dadosBusca.incluirUber) ? 'checked' : '' %>> Incluir Uber
+          <input type="checkbox" name="incluirUber" id="incluirUber" <%= (typeof dadosBusca !== 'undefined' && dadosBusca && dadosBusca.incluirUber) ? 'checked' : '' %>> Incluir TRANSPORTE
         </label>
       </div>
 
@@ -315,7 +315,7 @@
             
             <div class="uber-info-card">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm1-7h-2v2h2V10zm0 4h-2v2h2v-2z"/></svg>
-              Uber (ida/volta): R$ <%= item.precoUber %>
+              Transporte (ida/volta): R$ <%= item.precoUber %>
             </div>
             
             <div class="click-hint">Ver detalhes</div>
@@ -446,7 +446,7 @@ btnGps.onclick = () => {
   }, () => {
     alert('Erro ao obter localização');
     inputEnd.disabled = false;
-    inputEnd.placeholder = 'Ex: Savassi...';
+    inputEnd.placeholder = 'Ex: Bairro, Cidade';
   });
 };
 
@@ -499,7 +499,7 @@ async function abrirDetalhes(placeId, uberPrice, saldo, budget, avgPrice) {
         // Reviews
         let reviewsHtml = '';
         if (data.reviews && data.reviews.length > 0) {
-            reviewsHtml += '<div class="reviews-title">O que a galera fala</div>';
+            reviewsHtml += '<div class="reviews-title">O que dizem sobre este lugar.</div>';
             data.reviews.slice(0, 3).forEach(r => {
                 reviewsHtml += `
                     <div class="review-item">
@@ -526,7 +526,7 @@ async function abrirDetalhes(placeId, uberPrice, saldo, budget, avgPrice) {
                     <div class="finance-value">R$ ${budget}</div>
                 </div>
                 <div class="finance-item">
-                    <div class="finance-label">Uber (Ida/Volta)</div>
+                    <div class="finance-label">Transporte (Ida/Volta)</div>
                     <div class="finance-value">R$ ${uberPrice}</div>
                 </div>
                 <div class="finance-item">
