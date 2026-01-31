@@ -1,0 +1,20 @@
+module.exports = {
+    USER: {
+        FIND_BY_ID: 'SELECT_USER_BY_ID',
+        INSERT: 'INSERT_USER',
+        UPDATE_PLAN: 'UPDATE_USER_PLAN'
+    },
+    PESQUISA: {
+        INSERT: 'INSERT_PESQUISA',
+        FIND_BY_CITY: 'SELECT_PESQUISAS_NA_CIDADE'
+    },
+    API: {
+        LOG_USAGE: 'INSERT_USO_API'
+    },
+    CACHE: {
+        GET_GEOCODE: 'SELECT_CACHE_GEOCODE',
+        SET_GEOCODE: 'INSERT_CACHE_GEOCODE',
+        GET_PLACE: 'SELECT_CACHE_PLACE',
+        SET_PLACE: 'INSERT_CACHE_PLACE'
+    }
+};
