@@ -13,7 +13,6 @@
   <!-- Icons -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
 
-  <!-- CSS DO HEADER -->
   <style>
     body {
       font-family: 'Inter', sans-serif;
@@ -123,10 +122,8 @@
 
 <body class="bg-dark text-light">
 
-  <!-- HEADER -->
   <header class="fugida-header">
     <div class="header-inner">
-
       <div class="header-side"></div>
 
       <div class="header-center">
@@ -137,6 +134,7 @@
         <% if (user) { %>
           <div class="user-box">
             <span class="user-name">Olá, <%= user.name.split(' ')[0] %></span>
+            <img src="<%= user.avatar_url %>" alt="Avatar">
             <a href="/auth/logout" class="logout-btn">Sair</a>
           </div>
         <% } else { %>
@@ -146,6 +144,5 @@
           </a>
         <% } %>
       </div>
-
     </div>
   </header>

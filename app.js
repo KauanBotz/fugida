@@ -6,11 +6,6 @@ require('dotenv').config()
 var http = require('http')
 var port = process.env.PORT || 3001
 
-const expressLayouts = require('express-ejs-layouts');
-
-app.use(expressLayouts);
-app.set('layout', 'layouts/header');
-
 // =================== STATIC ===================
 app.use(express.static(__dirname + '/views'))
 app.use(express.static(__dirname + '/public'))
