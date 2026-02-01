@@ -64,10 +64,10 @@ function getEstimativaPreco(level) {
 }
 
 router.get('/', function(req, res) {
-    res.redirect('/places');
+    res.redirect('/search-leisure');
 });
 
-router.get('/places', function(req, res) {
+router.get('/search-leisure', function(req, res) {
   res.render('index', { 
     title: 'Fugida', 
     roteiros: null, 

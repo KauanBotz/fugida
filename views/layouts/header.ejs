@@ -134,7 +134,6 @@
         <% if (user) { %>
           <div class="user-box">
             <span class="user-name">Olá, <%= user.name.split(' ')[0] %></span>
-            <img src="<%= user.avatar_url %>" alt="Avatar">
             <a href="/auth/logout" class="logout-btn">Sair</a>
           </div>
         <% } else { %>
