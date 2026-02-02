@@ -1,119 +1,139 @@
 # 🍻 Fugida
-**Seu próximo rolê decidido em segundos.**
+**Your next night out decided in seconds.**
 
-O **Fugida** é uma aplicação web inteligente criada para acabar com a indecisão na hora de sair.  
-Com base na sua **localização**, **vibe desejada** e **orçamento**, o app encontra as melhores opções de lazer, calcula os custos de transporte e garante que o rolê caiba no bolso.
-
----
-
-## 🚀 Funcionalidades
-
-- 📍 **Geolocalização Inteligente**  
-  Detecta automaticamente onde você está ou permite busca manual por bairro/cidade.
-
-- 🔎 **Busca por Vibe**  
-  Filtros por categorias como:
-  - Bares  
-  - Restaurantes românticos  
-  - Baladas  
-  - Ao ar livre  
-  - Cultura  
-
-- 💰 **Calculadora de Orçamento**  
-  Estima o custo do Uber/99 (ida e volta) e mostra quanto sobra para gastar no local.
-
-- 🚗 **Integração com Transporte**  
-  Deep links para abrir o destino diretamente no app da **Uber** ou **99Pop**.
-
-- ⭐ **Detalhes Completos dos Locais**  
-  Fotos, avaliações, nota média e horários via **Google Places API**.
-
-- 🔐 **Login Social**  
-  Autenticação rápida e segura com **Google**.
+**Fugida** is an intelligent web application designed to eliminate indecision when going out.
+Based on your **location**, **desired vibe**, and **budget**, the app finds the best leisure options, calculates transportation costs, and ensures your plans fit your budget.
 
 ---
 
-## 🛠️ Tecnologias Utilizadas
+## 🚀 Features
+
+- 📍 **Smart Geolocation**
+  Automatically detects your location or allows manual search by neighborhood or city.
+
+- 🔎 **Vibe-Based Search**
+  Filters by categories such as:
+  - Bars
+  - Romantic Restaurants
+  - Nightclubs
+  - Outdoor Activities
+  - Culture
+
+- 💰 **Budget Calculator**
+  Estimates Uber/99 transportation costs (round trip) and shows how much money remains to spend at the venue.
+
+- 🚗 **Transport Integration**
+  Deep links to open the destination directly in the **Uber** or **99Pop** app.
+
+- ⭐ **Complete Venue Details**
+  Photos, reviews, average rating, and opening hours via **Google Places API**.
+
+- 🔐 **Social Login**
+  Fast and secure authentication using **Google**.
+
+---
+
+## 🛠️ Technologies Used
 
 ### Backend
-- Node.js  
-- Express  
+- Node.js
+- Express
 
 ### Frontend
-- EJS (Embedded JavaScript Templates)  
-- CSS3 moderno  
+- EJS (Embedded JavaScript Templates)
+- Modern CSS3
 
-### Banco de Dados
-- MySQL  
+### Database
+- MySQL
 
-### APIs Externas
-- Google Maps JavaScript API  
-- Google Places API (Text Search & Details)  
-- Google Distance Matrix API  
-- Google Geocoding API  
+### External APIs
+- Google Maps JavaScript API
+- Google Places API (Text Search & Details)
+- Google Distance Matrix API
+- Google Geocoding API
 
-### Autenticação
+### Authentication
 - Passport.js (Google Strategy)
 
 ---
 
-## ⚙️ Instalação e Configuração
+## ⚙️ Installation and Setup
 
-### 1. Pré-requisitos
-- Node.js instalado  
-- MySQL instalado e em execução  
-- Conta no Google Cloud Platform com APIs de mapas habilitadas  
+### 1. Prerequisites
+- Node.js installed
+- MySQL installed and running
+- Google Cloud Platform account with Maps APIs enabled
 
 ---
 
-### 2. Clone o repositório
+### 2. Clone the repository
 ```bash
-git clone https://github.com/seu-usuario/fugida.git
+git clone https://github.com/your-username/fugida.git
 cd fugida
-3. Instale as dependências
-bash
-Copiar código
+```
+
+---
+
+### 3. Install dependencies
+```bash
 npm install
-4. Configuração do Banco de Dados
-Crie um banco de dados MySQL e execute o script:
+```
 
-text
-Copiar código
+---
+
+### 4. Database Configuration
+
+Create a MySQL database and run the script below:
+```text
 database/schema.sql
-5. Variáveis de Ambiente
-Crie um arquivo .env na raiz do projeto:
+```
 
-env
-Copiar código
-# Servidor
+---
+
+### 5. Environment Variables
+
+Create a `.env` file at the root of the project:
+
+```env
+# Server
 PORT=3000
-SESSION_SECRET=sua_chave_secreta_aqui
+SESSION_SECRET=your_secret_key_here
 
 # Google Maps Platform
-GOOGLE_MAPS_API_KEY=sua_api_key_do_google
-GOOGLE_PLACES_API_KEY=sua_api_key_do_google
-GOOGLE_DISTANCE_MATRIX_API_KEY=sua_api_key_do_google
+GOOGLE_MAPS_API_KEY=your_google_api_key
+GOOGLE_PLACES_API_KEY=your_google_api_key
+GOOGLE_DISTANCE_MATRIX_API_KEY=your_google_api_key
 
 # Google OAuth
-GOOGLE_CLIENT_ID=seu_client_id
-GOOGLE_CLIENT_SECRET=seu_client_secret
+GOOGLE_CLIENT_ID=your_client_id
+GOOGLE_CLIENT_SECRET=your_client_secret
 GOOGLE_CALLBACK_URL=http://localhost:3000/auth/google/callback
 
-# Banco de Dados
+# Database
 DB_HOST=localhost
 DB_USER=root
-DB_PASS=sua_senha_mysql
+DB_PASS=your_mysql_password
 DB_NAME=fugida_db
-6. Rodando a aplicação
-Modo desenvolvimento:
+```
 
-bash
-Copiar código
+---
+
+### 6. Running the application
+
+#### Development mode
+```bash
 npm run dev
-Modo padrão:
+```
 
-bash
-Copiar código
+#### Production mode
+```bash
 node app.js
-Acesse no navegador:
-👉 http://localhost:3000
+```
+
+Open in your browser:
+👉 **http://localhost:3000**
+
+---
+
+## 📄 License
+This project is for educational and portfolio purposes.
